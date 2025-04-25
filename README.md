@@ -35,19 +35,41 @@ Autres variables notables :
 
 ---
 
-**🧩 Données complémentaires potentielles : OpenCritic**
+**🧩 Données complémentaires potentielles : **
+
+#### 1️⃣ OpenCritic
 
 Afin d’enrichir notre analyse et de croiser les points de vue entre joueurs et professionnels, nous avons mis de côté un potentiel second jeu de données. En complément du premier dataset, nous avons sélectionné **OpenCritic Ratings for all games and platforms**, contenant les évaluations issues de la presse spécialisée. Ce dataset provient du site [OpenCritic](https://opencritic.com), et permet de croiser :
 
-- Le **score moyen agrégé** de la presse
-- Une **classification qualitative OpenCritic** (ex. "Mighty", "Strong", etc.)
-- Les **plateformes**, la **date de sortie** et l’**URL OpenCritic** de chaque jeu
+- Le **score moyen agrégé** de la presse  
+- Une **classification qualitative OpenCritic** (ex. "Mighty", "Strong", etc.)  
+- Les **plateformes**, la **date de sortie** et l’**URL OpenCritic** de chaque jeu  
 
 Ce fichier est un `.csv` comportant 6 variables (toutes au format texte), avec des dates sous la forme `"Month Day, Year"` (ex: `"January 1, 2023"`). Il couvre tous les jeux sortis jusqu’en 2023.
 
 Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (depuis `How Long To Beat`) avec ceux de la **presse spécialisée** (via `OpenCritic`) par exemple.
 
+---
 
+#### 2️⃣ Steam Playtime & Engagement
+
+Pour élargir notre perspective sur les comportements de jeu et les durées de complétion, nous avons également considéré un **troisième jeu de données** extrait de la plateforme **Steam**, souvent utilisée comme référence dans l’analyse des tendances vidéoludiques.
+
+Ce fichier, intitulé `steam.csv`, contient des données publiques relatives à plus de **27 000 jeux** publiés sur Steam. Il regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives/négatives**, et les **nombre d’achievements**.
+
+Parmi les variables les plus utiles pour notre projet :
+
+- `average_playtime` : temps de jeu moyen en minutes (sur tous les joueurs).
+- `median_playtime` : temps de jeu médian.
+- `positive_ratings` / `negative_ratings` : nombre total d’évaluations positives et négatives laissées sur le jeu.
+- `owners` : fourchette estimée du nombre de propriétaires du jeu (ex. : "1,000,000-2,000,000").
+- `release_date` : date de sortie au format `YYYY-MM-DD`.
+- `price` : prix affiché du jeu au moment de l’extraction.
+- `categories`, `genres`, `steamspy_tags` : diverses classifications décrivant le gameplay et le contenu.
+- `platforms` : plateformes supportées (Windows, Mac, Linux).
+- `developer` / `publisher` : entités de développement et de publication.
+
+L’intérêt de ce dataset est de pouvoir **relier le temps de jeu réel observé sur Steam** avec les **temps de complétion déclarés** sur HowLongToBeat, et de confronter cela aux **notes utilisateur Steam** ou encore à la **popularité** mesurée par le nombre d’owners. Il offre également un aperçu de l’**engagement général des joueurs** indépendamment du style de complétion.
 ---
 
 
@@ -76,6 +98,9 @@ D'une façon générale nous voulons comparer les temps moyens de complétion :
 - Par année (ou mois) de publication
 - Par note (`Review_score`)
 - Par extrêmes des temps de jeu : valeurs minimales et maximales
+Nous pouvons aussi comparer le taux de complétion par rapport au prix du jeu pour voir si les joueurs sont plus investis en payant plus cher.
+Comparaison du playtime Steam vs HowLongToBeat (vérifie siles joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".)
+
 
 ---
 
@@ -86,6 +111,8 @@ Selon les variables analysées, nous envisageons d’utiliser :
 - Des **boîtes à moustaches** (boxplots) pour comparer les genres ou années
 - Des **courbes temporelles** pour étudier l’évolution dans le temps
 - **D'autres visualisations adéquates** pour explorer les corrélations (temps vs note, par exemple)
+- Des **matrices de corrélation** pour visualiser les corrélations entre plusieurs variables quantitatives (playtime, ratings, score, price)
+- Des **Bargraph** pour visualiser la distribution des temps de jeu en fonction des genres
 
 ---
 
