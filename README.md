@@ -112,7 +112,7 @@ Selon les variables analysées, nous envisageons d’utiliser :
 - Des **courbes temporelles** pour étudier l’évolution dans le temps
 - **D'autres visualisations adéquates** pour explorer les corrélations (temps vs note, par exemple)
 - Des **matrices de corrélation** pour visualiser les corrélations entre plusieurs variables quantitatives (playtime, ratings, score, price)
-- Des **Bargraph** pour visualiser la distribution des temps de jeu en fonction des genres
+- Des **Bargraph** pour visualiser la distribution des temps de jeu en fonction des genres/modes de jeu
 
 ---
 
