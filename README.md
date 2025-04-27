@@ -6,13 +6,13 @@ Lorsque nous avons dû choisir un sujet de projet pour visualiser des données, 
 
 ### 🗃️ Données
 
-**📄 Source**
+#### 📄 Sources
 
-Ainsi, notre objectif principal est d'analyser le temps de complétion de différents jeus vidéos afin de voir par quoi il est impacté. Pour ce faire, nous avons donc sélectionné un jeu de données appelé Video Games Playtime, **Auteur Kaggle :** [baraazaid](https://www.kaggle.com/baraazaid), que nous avons trouvé sur [Kaggle](https://www.kaggle.com/datasets/baraazaid/how-long-to-beat-video-games) et qui remplissait nos critères. ll est basé sur les données du site [How Long To Beat](https://howlongtobeat.com), qui recense des données sur le temps nécessaire pour terminer un jeu vidéo, selon différents styles de jeu. Ce jeu de données a été mis à jour pour la dernière fois en **2023**. Le fichier est au format **jsonlines** et contient **60 410 entrées**.
+Ainsi, notre objectif principal est d'analyser le temps de complétion de différents jeus vidéos afin de voir par quoi il est impacté. Pour ce faire, nous avons d'abord sélectionné un jeu de données appelé Video Games Playtime, **Auteur Kaggle :** [baraazaid](https://www.kaggle.com/baraazaid), que nous avons trouvé sur [Kaggle](https://www.kaggle.com/datasets/baraazaid/how-long-to-beat-video-games) et qui remplissait nos critères. ll est basé sur les données du site [How Long To Beat](https://howlongtobeat.com), qui recense des données sur le temps nécessaire pour terminer un jeu vidéo, selon différents styles de jeu. Ce jeu de données a été mis à jour pour la dernière fois en **2023**. Le fichier est au format **jsonlines** et contient **60 410 entrées**.
 
 ---
 
-**📦 Description détaillée des variables**
+#### 1️⃣ Video Games Playtime
 
 Plusieurs variables nous intéressent :
 
@@ -35,9 +35,7 @@ Autres variables notables :
 
 ---
 
-**🧩 Données complémentaires potentielles : **
-
-#### 1️⃣ OpenCritic
+#### 2️⃣ OpenCritic
 
 Afin d’enrichir notre analyse et de croiser les points de vue entre joueurs et professionnels, nous avons mis de côté un potentiel second jeu de données. En complément du premier dataset, nous avons sélectionné **OpenCritic Ratings for all games and platforms**, contenant les évaluations issues de la presse spécialisée. Ce dataset provient du site [OpenCritic](https://opencritic.com), et permet de croiser :
 
@@ -51,7 +49,7 @@ Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (
 
 ---
 
-#### 2️⃣ Steam Playtime & Engagement
+#### 3️⃣ Steam Playtime & Engagement
 
 Pour élargir notre perspective sur les comportements de jeu et les durées de complétion, nous avons également considéré un **troisième jeu de données** extrait de la plateforme **Steam**, souvent utilisée comme référence dans l’analyse des tendances vidéoludiques.
 
@@ -77,7 +75,7 @@ L’intérêt de ce dataset est de pouvoir **relier le temps de jeu réel observ
 
 Avant toute chose, nous avons réfléchi aux questions que nous souhaitons poser à nos données, aux croisements de variables intéressants, et aux méthodes de visualisation potentielles.
 
-**🎯 Objectifs & interrogations**
+#### 🎯 Objectifs & interrogations**
 
 - Quels sont les facteurs qui influencent le temps de complétion d’un jeu vidéo ?
 - Sur quelles parties les joueurs passent-ils le plus de temps (main story, extras, completionist) ?
@@ -89,7 +87,7 @@ Avant toute chose, nous avons réfléchi aux questions que nous souhaitons poser
 
 ---
 
-**🔄 Variables à comparer**
+#### 🔄 Variables à comparer**
 
 D'une façon générale nous voulons comparer les temps moyens de complétion :
 - Pour chaque mode de complétion (`Completionist`, `Speedrun`, `Multi-Player`...)
@@ -104,7 +102,7 @@ Comparaison du playtime Steam vs HowLongToBeat (vérifie siles joueurs jouent pl
 
 ---
 
-**🧰 Méthodes envisagées**
+#### 🧰 Méthodes envisagées**
 
 Selon les variables analysées, nous envisageons d’utiliser :
 - Des **histogrammes** pour visualiser les distributions de temps
@@ -116,7 +114,7 @@ Selon les variables analysées, nous envisageons d’utiliser :
 
 ---
 
-**⚠️ Limites anticipées**
+#### ⚠️ Limites anticipées**
 
 - Certaines durées sont enregistrées en format texte (`"12h 30m"`) et devront être transformées en **valeurs numériques** (minutes ou heures).
 - Les colonnes comme `Genres` contiennent plusieurs genres séparés par des délimiteurs ; (`"Third-Person, Action, Adventure, Role-Playing"` ==> phase de **nettoyage**).
