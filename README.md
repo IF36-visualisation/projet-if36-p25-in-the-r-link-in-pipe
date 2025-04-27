@@ -77,7 +77,7 @@ L’intérêt de ce dataset est de pouvoir **relier le temps de jeu réel observ
 
 Avant toute chose, nous avons réfléchi aux questions que nous souhaitons poser à nos données, aux croisements de variables intéressants, et aux méthodes de visualisation potentielles.
 
-#### 🎯 Objectifs & interrogations**
+#### 🎯 Objectifs & interrogations
 
 - Quels sont les facteurs qui influencent le temps de complétion d’un jeu vidéo ?
 - Sur quelles parties les joueurs passent-ils le plus de temps (main story, extras, completionist) ?
@@ -89,7 +89,7 @@ Avant toute chose, nous avons réfléchi aux questions que nous souhaitons poser
 
 ---
 
-#### 🔄 Variables à comparer**
+#### 🔄 Variables à comparer
 
 D'une façon générale nous voulons comparer les temps moyens de complétion :
 - Pour chaque mode de complétion (`Completionist`, `Speedrun`, `Multi-Player`...)
@@ -98,12 +98,13 @@ D'une façon générale nous voulons comparer les temps moyens de complétion :
 - Par année (ou mois) de publication
 - Par note (`Review_score`)
 - Par extrêmes des temps de jeu : valeurs minimales et maximales
+
 Nous pouvons aussi comparer le taux de complétion par rapport au prix du jeu pour voir si les joueurs sont plus investis en payant plus cher.
-Comparaison du playtime Steam vs HowLongToBeat (vérifie siles joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".)
+Nous souhaitons aussi comparer les temps de jeu du dataset Steam avec le dataset HowLongToBeat pour vérifier si les joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".
 
 ---
 
-#### 🧰 Méthodes envisagées**
+#### 🧰 Méthodes envisagées
 
 Selon les variables analysées, nous envisageons d’utiliser :
 - Des **histogrammes** pour visualiser les distributions de temps
@@ -115,7 +116,7 @@ Selon les variables analysées, nous envisageons d’utiliser :
 
 ---
 
-#### ⚠️ Limites anticipées**
+#### ⚠️ Limites anticipées
 
 - Certaines durées sont enregistrées en format texte (`"12h 30m"`) et devront être transformées en **valeurs numériques** (minutes ou heures).
 - Les colonnes comme `Genres` contiennent plusieurs genres séparés par des délimiteurs ; (`"Third-Person, Action, Adventure, Role-Playing"` ==> phase de **nettoyage**).
