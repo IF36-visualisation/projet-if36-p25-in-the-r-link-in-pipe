@@ -8,7 +8,11 @@ Lorsque nous avons dû choisir un sujet de projet pour visualiser des données, 
 
 #### 📄 Sources
 
-Ainsi, notre objectif principal est d'analyser le temps de complétion de différents jeus vidéos afin de voir par quoi il est impacté. Pour ce faire, nous avons d'abord sélectionné un jeu de données appelé Video Games Playtime, **Auteur Kaggle :** [baraazaid](https://www.kaggle.com/baraazaid), que nous avons trouvé sur [Kaggle](https://www.kaggle.com/datasets/baraazaid/how-long-to-beat-video-games) et qui remplissait nos critères. ll est basé sur les données du site [How Long To Beat](https://howlongtobeat.com), qui recense des données sur le temps nécessaire pour terminer un jeu vidéo, selon différents styles de jeu. Ce jeu de données a été mis à jour pour la dernière fois en **2023**. Le fichier est au format **jsonlines** et contient **60 410 entrées**.
+Ainsi, notre objectif principal est d'analyser le temps de complétion de différents jeus vidéos afin de voir par quoi il est impacté. Pour ce faire, nous avons d'abord sélectionné un jeu de données appelé Video Games Playtime qui remplissait nos critères. Nous l'avons trouvé sur [Kaggle](https://www.kaggle.com/datasets/baraazaid/how-long-to-beat-video-games), où son auteur est [baraazaid](https://www.kaggle.com/baraazaid). ll est basé sur les données du site [How Long To Beat](https://howlongtobeat.com), qui recense des données sur le temps nécessaire pour terminer un jeu vidéo, selon différents styles de jeu. Ce jeu de données a été mis à jour pour la dernière fois en **2023**. Le fichier, [``](](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/video_games_playtime.jsonlines.zip)), contient **60 410 entrées**.
+
+Afin d’enrichir notre analyse et de croiser les points de vue entre joueurs et professionnels, nous avons aussi sélectionné un deuxième jeu de données appelé **OpenCritic Ratings for all games and platforms**, disponible sur [Kaggle](https://www.kaggle.com/datasets/patkle/opencritic-ratings-for-all-games-and-platforms) où son auteur est [Patrick Klein](https://www.kaggle.com/patkle). Les données de ce dataset datent de **février 2023** et proviennent de [OpenCritic](https://opencritic.com), un site qui crée des notes pour les jeux en se basant sur des évaluations issues de la presse spécialisée. Le fichier, [`opencritic_rankings_feb_2023.csv`](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/opencritic_rankings_feb_2023.csv), contient **13111 entrées**.
+
+Pour élargir notre perspective sur les comportements de jeu et les durées de complétion, nous avons également choisi un **troisième jeu de données** extrait en **2019** de la plateforme **Steam**, souvent utilisée comme référence dans l’analyse des tendances vidéoludiques. Il est disponible sur [Kaggle](https://www.kaggle.com/datasets/nikdavis/steam-store-games?resource=download&select=steam.csv), où son auteur est [Nik Davis](https://www.kaggle.com/nikdavis). Ce fichier, intitulé [`steam.csv`](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/video_games_playtime.jsonlines.zip), contient des données publiques relatives à plus de **27 000 jeux** publiés sur Steam. 
 
 ---
 
@@ -35,9 +39,9 @@ Autres variables notables :
 
 ---
 
-#### 2️⃣ OpenCritic
+#### 2️⃣ OpenCritic Ratings
 
-Afin d’enrichir notre analyse et de croiser les points de vue entre joueurs et professionnels, nous avons mis de côté un potentiel second jeu de données. En complément du premier dataset, nous avons sélectionné **OpenCritic Ratings for all games and platforms**, contenant les évaluations issues de la presse spécialisée. Ce dataset provient du site [OpenCritic](https://opencritic.com), et permet de croiser :
+Ce dataset permet de croiser :
 
 - Le **score moyen agrégé** de la presse  
 - Une **classification qualitative OpenCritic** (ex. "Mighty", "Strong", etc.)  
@@ -51,9 +55,7 @@ Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (
 
 #### 3️⃣ Steam Playtime & Engagement
 
-Pour élargir notre perspective sur les comportements de jeu et les durées de complétion, nous avons également considéré un **troisième jeu de données** extrait de la plateforme **Steam**, souvent utilisée comme référence dans l’analyse des tendances vidéoludiques.
-
-Ce fichier, intitulé `steam.csv`, contient des données publiques relatives à plus de **27 000 jeux** publiés sur Steam. Il regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives/négatives**, et les **nombre d’achievements**.
+Ce jeu de données regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives/négatives**, et les **nombre d’achievements**.
 
 Parmi les variables les plus utiles pour notre projet :
 
