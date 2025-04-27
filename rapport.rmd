@@ -1,0 +1,38 @@
+
+---
+title: "Rapport d'exploration - HLTB"
+
+---
+
+## Le genre d’un jeu influence-t-il sa durée de complétion ?
+
+### Hypothèse
+
+Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
+
+---
+
+### Visualisation
+
+```{r fig.align='center', echo=FALSE, out.width='80%'}
+knitr::include_graphics("tps_moy_genre_mode.png")
+```
+
+---
+
+### Interprétation
+
+Ce graphique permet de comparer le **temps de jeu moyen par genre** selon trois modes de complétion : `main_story`, `extras` et `completionist`.
+
+- Les **jeux de rôle (Role-Playing)** sont clairement les plus longs, notamment en mode *completionist* où la moyenne dépasse 75h.
+- Les **jeux de course** ont aussi une durée moyenne importante en mode completionist, bien plus que ce que l’on aurait pu anticiper.
+Cela peut s'expliquer par le fait que les jeux de courses contiennent des saisons avec un certain nombre de courses à effectuer (entre 15 et 30). L'echec d'une seule course par saison suffit pour ne pas pouvoir terminer le jeu à 100% et prends donc beaucoup plus de temps de manière générale.
+- À l’inverse, les **shooters** et **platformers** sont globalement plus courts, rarement au-dessus de 10-15h même en mode étendu.
+Cela semble logique car les joueurs de shooters s'interessent plus à des modes compétitifs et les plateformeurs sont de manière générale plus courts et faciles a terminer que des jeux de rôle ou d'aventure.
+- 
+Ces résultats confirment que le genre du jeu est un bon prédicteur de sa durée. Il serait intéressant d’approfondir cette analyse en croisant la durée avec d’autres variables comme le prix pour voir par exemple si des jeux plus chèrs sont plus complets et par conséquent, plus long à terminer.
+
+---
+
+
+```
