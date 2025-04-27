@@ -47,7 +47,7 @@ Ce dataset permet de croiser :
 - Une **classification qualitative OpenCritic** (ex. "Mighty", "Strong", etc.)  
 - Les **plateformes**, la **date de sortie** et l’**URL OpenCritic** de chaque jeu  
 
-Ce fichier est un `.csv` comportant 6 variables (toutes au format texte), avec des dates sous la forme `"Month Day, Year"` (ex: `"January 1, 2023"`). Il couvre tous les jeux sortis jusqu’en 2023.
+Tous les variables sont au format texte, avec des dates sous la forme `"Month Day, Year"` (ex: `"January 1, 2023"`).
 
 Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (depuis `How Long To Beat`) avec ceux de la **presse spécialisée** (via `OpenCritic`) par exemple.
 
