@@ -55,7 +55,7 @@ Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (
 
 #### 3️⃣ Steam Playtime & Engagement
 
-Ce jeu de données regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives/négatives**, et les **nombre d’achievements**.
+Ce jeu de données regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives ou négatives**, et les **nombres de succès**.
 
 Parmi les variables les plus utiles pour notre projet :
 
@@ -70,8 +70,8 @@ Parmi les variables les plus utiles pour notre projet :
 - `developer` / `publisher` : entités de développement et de publication.
 
 L’intérêt de ce dataset est de pouvoir **relier le temps de jeu réel observé sur Steam** avec les **temps de complétion déclarés** sur HowLongToBeat, et de confronter cela aux **notes utilisateur Steam** ou encore à la **popularité** mesurée par le nombre d’owners. Il offre également un aperçu de l’**engagement général des joueurs** indépendamment du style de complétion.
----
 
+---
 
 ### 🧠 Plan d’analyse
 
@@ -101,7 +101,6 @@ D'une façon générale nous voulons comparer les temps moyens de complétion :
 Nous pouvons aussi comparer le taux de complétion par rapport au prix du jeu pour voir si les joueurs sont plus investis en payant plus cher.
 Comparaison du playtime Steam vs HowLongToBeat (vérifie siles joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".)
 
-
 ---
 
 #### 🧰 Méthodes envisagées**
@@ -121,7 +120,6 @@ Selon les variables analysées, nous envisageons d’utiliser :
 - Certaines durées sont enregistrées en format texte (`"12h 30m"`) et devront être transformées en **valeurs numériques** (minutes ou heures).
 - Les colonnes comme `Genres` contiennent plusieurs genres séparés par des délimiteurs ; (`"Third-Person, Action, Adventure, Role-Playing"` ==> phase de **nettoyage**).
 - Faire attention aux données qui peuvent être **manquantes** ou **aberrantes**.
-
 
 ---
 
