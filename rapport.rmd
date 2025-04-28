@@ -18,6 +18,8 @@ library(stringr)
 library(tidyr)
 library(networkD3)
 library(htmltools)
+library(magrittr)
+library(ggplot2)
 
 hltb <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
 # hltb <- read.csv("hltb_clean.csv", stringsAsFactors = FALSE)
@@ -129,3 +131,90 @@ Ces résultats confirment que le genre du jeu est un bon prédicteur de sa duré
 
 
 ```
+
+---
+
+## Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
+
+Pour répondre à cette question, nous cherchons à réaliser un histogramme comparant les avis des joueurs au temps de jeu moyen et médian passé sur les jeux.
+
+### Filtrage des données
+
+```{r}
+ratings_playtime <- read.csv("steam.csv") %>% filter(average_playtime != 0) %>% mutate(
+  average_playtime_hours = round(average_playtime / 60, 2),
+  median_playtime_hours = round(median_playtime / 60, 2),
+  percent_positive_ratings = round(100 * positive_ratings / (positive_ratings + negative_ratings))
+) %>% select(percent_positive_ratings,
+             average_playtime_hours,
+             median_playtime_hours)
+```
+
+### Création des buckets d'avis positifs
+
+```{r}
+ratings_summary <- ratings_playtime %>%
+  mutate(
+    rating_bucket = cut(
+      percent_positive_ratings,
+      breaks = c(0, 25, 50, 75, 100),
+      labels = c("0-25%", "25-50%", "50-75%", "75-100%"),
+      include.lowest = TRUE
+    )
+  ) %>%
+  group_by(rating_bucket) %>%
+  summarise(
+    average_playtime = mean(average_playtime_hours, na.rm = TRUE),
+    median_playtime = median(median_playtime_hours, na.rm = TRUE)
+  )
+```
+
+### Génération du graphique
+
+```{r, fig.width=12, fig.height=7}
+ggplot(ratings_summary, aes(x = rating_bucket)) +
+  geom_col(aes(y = average_playtime, fill = "Moyenne"), width = 0.6) +
+  geom_col(aes(y = median_playtime, fill = "Médiane"), width = 0.3) +
+  geom_text(
+    aes(y = average_playtime, label = round(average_playtime, 1)),
+    vjust = -0.5,
+    size = 4,
+    color = "#ff8b00",
+    fontface = "bold"
+  ) +
+  geom_text(
+    aes(y = median_playtime, label = round(median_playtime, 1)),
+    vjust = -0.5,
+    size = 4,
+    color = "#9fcaff",
+    fontface = "bold"
+  ) +
+  scale_fill_manual(values = c("Moyenne" = "#0074ff", "Médiane" = "#ff8b00"),
+                    name = "") +
+  labs(
+    title = "Comparaison du temps de jeu moyen et médian par tranche d'avis positifs",
+    subtitle = "Source : Steam (jeux avec temps de jeu non nul)",
+    x = "Pourcentage d'avis positifs",
+    y = "Temps de jeu (heures)"
+  ) +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      size = 18,
+      face = "bold",
+      color = "black"
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5,
+      size = 12,
+      color = "black"
+    ),
+    axis.title = element_text(size = 14, color = "black"),
+    axis.text = element_text(size = 12, color = "black"),
+    panel.grid.major = element_line(color = "grey90"),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
