@@ -1,6 +1,5 @@
 ---
 title: "Rapport d'exploration - Temps de jeu"
-title: "IF36_Markdown"
 author: "In the R - Link In Pipe"
 date: "2025-04-28"
 always_allow_html: true
@@ -16,6 +15,7 @@ output:
 Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
 
 ---
+
 ## Code
 ```{r}
 library(dplyr)
@@ -126,7 +126,7 @@ browsable(
 ### Visualisation
 
 ```{r fig.align='center', echo=FALSE, out.width='80%'}
-knitr::include_graphics("tps_moy_genre_mode.png")
+#knitr::include_graphics("tps_moy_genre_mode.png")
 ```
 
 ---
