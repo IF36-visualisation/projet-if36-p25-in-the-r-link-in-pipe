@@ -253,7 +253,7 @@ steam <- read.csv("/Users/tifenn/Downloads/rapport/steam.csv") # chemin local
 
 names(steam)
 
-# Nettoyer les genres : garder le premier genre
+# Nettoyer les genres : extraire le premier genre
 steam <- steam %>%
   filter(!is.na(genres), average_playtime > 0) %>%
   mutate(
@@ -287,3 +287,56 @@ Le graphique **valide notre hypothèse**, montrant clairement que les jeux de ty
 
 Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
 
+## Graphique 2
+
+```{r jeux_plus_joues_par_genre, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Nettoyage : extraire le premier genre
+steam_clean_simple <- steam %>%
+  filter(!is.na(average_playtime), average_playtime > 0, genres != "") %>%
+  mutate(
+    average_playtime_hours = average_playtime / 60,
+    genre_main = str_split(genres, ";") |> sapply(\(x) str_trim(x[1]))
+  )
+
+# Sélection des 15 jeux les plus joués
+top_jeux_simple <- steam_clean_simple %>%
+  arrange(desc(average_playtime_hours)) %>%
+  slice_head(n = 15)
+
+# Nouveau graphique
+ggplot(top_jeux_simple, aes(x = reorder(name, average_playtime_hours), y = average_playtime_hours, fill = genre_main)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Les 15 jeux les plus joués sur Steam par genre principal",
+    x = "Jeu",
+    y = "Temps moyen de jeu (en heures)",
+    fill = "Genre principal"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.text = element_text(size = 8))
+```
+
+### Interprétation des résultats
+
+Le graphique obtenu montre que :
+
+- Certains jeux avec un genre **Adventure** ou **Free to Play** apparaissent comme ayant des **temps de jeu moyens particulièrement élevés**.
+- Parmis les 5 premiers, **3** font partie du genre **Adventure**.
+- Les **jeux de genre indépendants (Indie)** orientés du même type figurent parmi les titres les plus joués en termes de durée.
+- Cela **confirme partiellement notre hypothèse** : les genres favorisant **l'exploration** ou **l'investissement dans un personnage** tendent à engendrer des sessions de jeu beaucoup plus longues. **Cependant** nous sommes plutôt surpris de ne pas voir plus de jeux **Multijoueurs** en haut du classement, comme le montrait le premier graphique, qui ont notament une durée de vie quasi **illimité**. 
+
+### Hypothèse 
+
+Nous pouvons formuler l’hypothèse suivante : si le genre "Massively Multiplayer" apparaît très largement en tête dans le graphique 1 (temps moyen par genre), c’est parce que les jeux multijoueurs en ligne sont conçus pour encourager un investissement très long dans la durée (progression continue, événements récurrents, interactions sociales), mais ils restent peu nombreux en nombre de titres comparé aux jeux d'aventure ou free-to-play. Ainsi, dans le graphique 2, les jeux d'aventure et free-to-play dominent car ils sont beaucoup plus représentés dans le catalogue global et certains titres très populaires tirent leur genre vers le haut en termes de temps joué.
+
+### Remarque
+
+Il est important de préciser que ce dataset date de **2019**.
+Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
+
+---
