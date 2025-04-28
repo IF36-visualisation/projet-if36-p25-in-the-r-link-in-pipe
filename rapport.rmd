@@ -235,3 +235,55 @@ ggplot(ratings_summary, aes(x = rating_bucket)) +
 
 ---
 
+# Question : Il y a t il une corrélation entre le temps de jeu et son genre ?
+
+## Hypothèse
+
+Pour cette analyse, nous avons voulu identifier quels étaient les jeux présentant les **temps de jeu moyens les plus élevés** sur Steam et **les genres associés**.  
+**Notre hypothèse** est que certains types de jeux, comme les **jeux de simulation** ou les **multijoueurs**, pourraient inciter à des sessions de jeu beaucoup plus longues que d’autres genres plus rapides ou épisodiques.
+
+
+```{r genre_les_plus_joues, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Charger les données depuis le CSV
+steam <- read.csv("/Users/tifenn/Downloads/rapport/steam.csv") # chemin local
+
+names(steam)
+
+# Nettoyer les genres : garder le premier genre
+steam <- steam %>%
+  filter(!is.na(genres), average_playtime > 0) %>%
+  mutate(
+    genre_main = str_split(genres, ";", simplify = TRUE)[,1],
+    average_playtime_hours = average_playtime / 60
+  )
+
+# Calculer la moyenne du temps de jeu par genre
+genre_summary <- steam %>%
+  group_by(genre_main) %>%
+  summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
+  arrange(desc(mean_playtime))
+
+# Afficher le graphique
+ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Temps moyen de jeu par genre",
+    x = "Genre",
+    y = "Temps moyen (heures)"
+  ) +
+  theme_minimal()
+```
+
+### Interprétation des résultats
+
+Le graphique **valide notre hypothèse**, montrant clairement que les jeux de type **"Massively Multiplayer"** (MMORPG) et **"Free to Play"** enregistrent les temps de jeu moyens les plus élevés. Cela peut s’expliquer par leur fonctionnement : les MMORPG sont conçus pour retenir les joueurs sur le long terme grâce à des systèmes d’évolution progressive, de missions quotidiennes, d’interactions sociales et d'abonnement. Les jeux Free to Play, souvent multijoueurs eux aussi, encouragent également une forte rétention pour maximiser leur modèle économique basé sur les microtransactions.
+
+À l'inverse, des genres comme **"Casual"**, **"Photo Editing"**, **"Nudity"** ou encore **"Gore"** affichent des temps moyens bien plus courts. Ces catégories correspondent souvent à des expériences plus brèves, peut être de par leur contenu limité, ou parce que leur public recherche des sessions de jeu rapides.
+
+Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
+
