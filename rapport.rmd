@@ -18,116 +18,60 @@ Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de c
 
 ## Code
 ```{r}
+# Chargement des bibliothèques
 library(dplyr)
-library(stringr)
 library(tidyr)
-library(networkD3)
-library(htmltools)
-library(magrittr)
 library(ggplot2)
+library(stringr)
 
-hltb <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
-# hltb <- read.csv("hltb_clean.csv", stringsAsFactors = FALSE)
-```
+# Lecture du fichier CSV
+df <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
 
-
-### 1. Convertir les durées textuelles en minutes
-```{r}
-convert_to_minutes <- function(time_str) {
-  if (is.na(time_str) || time_str == "" || grepl("--", time_str)) return(NA)
+# Fonction robuste de conversion "23h 17m" -> heures décimales
+convert_to_hours <- function(time_str) {
+  time_str[time_str == "" | time_str == "N/A" | is.na(time_str)] <- NA
   h <- as.numeric(str_extract(time_str, "\\d+(?=h)"))
   m <- as.numeric(str_extract(time_str, "\\d+(?=m)"))
   h[is.na(h)] <- 0
   m[is.na(m)] <- 0
-  return(h * 60 + m)
+  result <- ifelse(is.na(time_str), NA, h + m / 60)
+  return(result)
 }
-```
 
-### 2. Appliquer la conversion
-```{r}
-hltb <- hltb %>%
-  mutate(
-    main_story_min = sapply(main_story, convert_to_minutes),
-    extras_min = sapply(extras, convert_to_minutes),
-    completionist_min = sapply(completionist, convert_to_minutes)
-  )
-```
+# Conversion des colonnes
+df$main_story <- convert_to_hours(df$main_story)
+df$extras <- convert_to_hours(df$extras)
+df$completionist <- convert_to_hours(df$completionist)
 
-### 3. Nettoyer les lignes valides
-```{r}
-cleaned <- hltb %>%
-  filter(!is.na(main_story_min) | !is.na(extras_min) | !is.na(completionist_min))
-```
+# Extraction du genre principal (1er genre listé)
+df$Primary_Genre <- sapply(strsplit(df$Genres, ","), function(x) trimws(x[1]))
 
-### 4. Générer les genres décomposés
-```{r}
-genres_expanded <- cleaned %>%
-  separate_rows(Genres, sep = ",\\s*") %>%
-  mutate(Genres = str_trim(Genres))
-```
+# Sélection de 5 genres populaires
+genres_to_keep <- c("Shooter", "Adventure", "Role-Playing", "Platformer", "Racing")
+df_filtered <- df %>%
+  filter(Primary_Genre %in% genres_to_keep)
 
-### 5. Générer les 4 Sankey sélectionnés
-```{r}
-selected_genres <- c("First-Person", "Action", "Shooter", "Open World")
+# Mise au format long
+df_long <- df_filtered %>%
+  select(Primary_Genre, main_story, extras, completionist) %>%
+  pivot_longer(cols = c(main_story, extras, completionist),
+               names_to = "Mode", values_to = "Temps_heures")
 
-plots <- list()
+# Calcul des moyennes
+df_summary <- df_long %>%
+  filter(!is.na(Temps_heures)) %>%
+  group_by(Primary_Genre, Mode) %>%
+  summarise(Temps_moyen = mean(Temps_heures), .groups = "drop")
 
-for (genre in selected_genres) {
-  genre_data <- genres_expanded %>% filter(Genres == genre)
-  
-  main_total <- sum(!is.na(genre_data$main_story_min))
-  extras_total <- sum(!is.na(genre_data$extras_min))
-  completionist_total <- sum(!is.na(genre_data$completionist_min))
-  
-  # Empiler les flux
-  nb_completionist <- completionist_total
-  nb_extras_only <- extras_total + completionist_total
-  nb_main_only <- main_total + nb_extras_only + nb_completionist
-  
-  main_avg <- mean(genre_data$main_story_min, na.rm = TRUE)
-  extras_avg <- mean(genre_data$extras_min, na.rm = TRUE)
-  completionist_avg <- mean(genre_data$completionist_min, na.rm = TRUE)
-  
-  nodes_genre <- data.frame(name = c(
-    paste0("Joueurs (", genre, ")"),
-    paste0("Main Only (\n", round(100 * main_total / (main_total+ extras_total +completionist_total)), "%) | Temps moyen ", round(main_avg), " min "),
-    paste0("Main + Extras (\n", round(100 * extras_total / (main_total+ extras_total +completionist_total)), "%) | Temps moyen ", round(extras_avg), " min"),
-    paste0("Completionist (\n", round(100 * completionist_total /(main_total+ extras_total +completionist_total)), "%) | Temps moyen ", round(completionist_avg), " min" )
-  ))
-  
-  links_genre <- data.frame(
-    source = c(0, 0, 0),
-    target = c(1, 2, 3),
-    value  = c(nb_main_only, nb_extras_only, nb_completionist)
-  )
-  
-  sankey <- sankeyNetwork(
-    Links = links_genre, Nodes = nodes_genre,
-    Source = "source", Target = "target", Value = "value",
-    NodeID = "name", fontSize = 26, nodeWidth = 30,
-    sinksRight = FALSE,
-    colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10)")
-  )
-  
-  plots[[genre]] <- sankey
-}
-```
-
-### 6. Afficher tous les Sankey côte à côte dans le Viewer R
-browsable(
-  div(
-    style = "display: flex; flex-wrap: wrap; gap: 20px;",
-    lapply(plots, function(p) {
-      div(style = "flex: 1 1 48%; min-width: 400px;", p)
-    })
-  )
-)
-
-### Visualisation
-
-```{r fig.align='center', echo=FALSE, out.width='80%'}
-#knitr::include_graphics("tps_moy_genre_mode.png")
-```
+# Barplot final
+ggplot(df_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Temps de jeu moyen par genre et par mode",
+       x = "Genre principal",
+       y = "Temps de jeu moyen (heures)",
+       fill = "Mode de jeu") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_minimal()
 
 ---
 
