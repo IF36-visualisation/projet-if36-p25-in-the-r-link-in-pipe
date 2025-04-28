@@ -251,8 +251,6 @@ library(stringr)
 # Charger les données depuis le CSV
 steam <- read.csv("/Users/tifenn/Downloads/rapport/steam.csv") # chemin local
 
-names(steam)
-
 # Nettoyer les genres : extraire le premier genre
 steam <- steam %>%
   filter(!is.na(genres), average_playtime > 0) %>%
@@ -349,7 +347,7 @@ Nous avons voulu déterminer si le **prix** d’un jeu et **l’avis donné par 
 Nous pensons que les jeux les **moins chers** et les **mieux notés** sont ceux qui sont les plus achetés. 
 
 ## Code 
-```{r, fig.width=12, fig.height=7}
+```{r}
 
 # On importe les librairies nécessaires
 library(ggplot2)
