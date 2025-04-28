@@ -14,9 +14,6 @@ output:
 
 Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
 
----
-
-## Code
 ```{r}
 # Chargement des bibliothèques
 library(dplyr)
@@ -63,6 +60,7 @@ df_summary <- df_long %>%
   group_by(Primary_Genre, Mode) %>%
   summarise(Temps_moyen = mean(Temps_heures), .groups = "drop")
 
+
 # Barplot final
 ggplot(df_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
   geom_bar(stat = "identity", position = "dodge") +
@@ -71,7 +69,9 @@ ggplot(df_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
        y = "Temps de jeu moyen (heures)",
        fill = "Mode de jeu") +
   scale_fill_brewer(palette = "Set2") +
-  theme_minimal()
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 
 ---
 
