@@ -340,3 +340,97 @@ Il est important de préciser que ce dataset date de **2019**.
 Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
 
 ---
+
+# Il y a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?
+
+## Hypothèse
+
+Nous avons voulu déterminer si le **prix** d’un jeu et **l’avis donné par les joueurs** avaient une influence sur le **nombre de personnes qui achètent le jeu**, mais aussi si il y avait une corrélation entre le **prix** et **l’avis des joueurs**.
+Nous pensons que les jeux les **moins chers** et les **mieux notés** sont ceux qui sont les plus achetés. 
+
+## Code 
+```{r, fig.width=12, fig.height=7}
+
+# On importe les librairies nécessaires
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+library(tidyr)
+
+# On charge le fichier csv
+steam <- read.csv("/Users/lucilepereira/Library/Mobile Documents/com~apple~CloudDocs/Cours /IF36/Projet/Data/steam.csv")
+
+# On ne garde que les variables dont on a besoin (avis, note, nombre de possesseurs)
+steam_ratings_price_owners <- steam %>%
+  select(positive_ratings, negative_ratings, price, owners)
+
+# On calcule la médiane du nombre de possesseurs, en milliers
+steam_ratings_price_owners <- steam_ratings_price_owners %>%
+  separate(owners,c('min_owners','max_owners'),'-') %>%
+  mutate(max_owners = as.numeric(max_owners) / 1000, min_owners = as.numeric(min_owners) / 1000) %>%
+  mutate(owners = ((max_owners - min_owners) / 2 ) + min_owners)
+
+# On supprime les lignes où il y a trop de possesseurs ou un prix trop élévé
+# pour éviter que quelques outliers ne rendent le graphique illisible car trop petit 
+# On supprime aussi les lignes où il y a trop peu d'avis car elles peuvent fausser les données
+steam_ratings_price_owners <- steam_ratings_price_owners %>%
+  filter(positive_ratings+negative_ratings>5, owners < 1000, price < 100)
+
+# On calcule le pourcentage de votes positifs
+steam_ratings_price_owners <- steam_ratings_price_owners %>%
+  mutate(ratings = ((positive_ratings / (positive_ratings + negative_ratings)) * 100))
+
+# On met les lignes avec le plus de possesseurs sur le dessus du graphique
+# Elles sont moins nombreuses donc cela permet de mieux les voir 
+steam_ratings_price_owners <- steam_ratings_price_owners %>%
+  arrange(owners)
+
+# On crée un graphique en nuage de points
+graphe <- ggplot(steam_ratings_price_owners,
+                 aes(x = price,
+                     y = ratings,
+                     color = owners)) +
+  geom_point()
+
+# On inverse les couleurs du dégradé, onveut qu'un nombre plus élevé = une couleur plus sombre
+graphe <- graphe + scale_colour_gradient(low = "#56B1F7", high = "#132B43")
+
+# On ajoute un titre et on change les labels
+graphe <- graphe + labs(colour = "Médiane du nombre\nestimé de possesseurs,\nen milliers",
+                        y = "Pourcentage de votes positifs",
+                        x = "Prix en dollars américains",
+                        title = "Estimation du nombre de possesseurs d'un jeu\nen fonction du prix et du nombre de votes positifs")
+
+# On affiche le graphique
+graphe
+
+```
+
+## Interprétation des résultats
+
+Le graphique obtenu montre que :
+
+- Les jeux **les moins chers** et **les mieux notés** sont **les plus possédés**.
+- Les jeux n'ayant **que des notes positives** sont dans **les moins possédés**, mais le reste du temps, **plus un jeu a de votes positifs plus que négatifs**, **plus il est possédé**. 
+- Les jeux **les plus possédés** sont des jeux **gratuits**.
+- Plus un jeu est **cher**, plus il a un **pourcentage d'avis élevé**.
+- Une majorité des jeux ont un **prix en dessous de 50 dollars**, et même **en dessous de 25 dollars**.
+- On remarque que **les prix finissant par 5 ou 0** sont **plus communs** que les autres, notamment **à partir de 30 dollars**. 
+
+Cela **confirme partiellement** notre hypothèse : on voit que **moins un jeu est cher** et **plus il a un pourcentage élevé d'avis positifs**, **plus il aura de chances d'être possédé**. On voit aussi apparaître une **corrélation entre note et prix**.
+
+## Hypothèse 
+
+Nous pouvons donc partir du principe que lorsqu'un jeu est peu cher, et surtout lorsqu'il est gratuit, les utilisateurs vont plus l'acheter. De plus, les utilisateurs auront plus tendance à acheter un jeu s'il est bien noté. Nous pouvons supposer que c'est dû aux faits suivants :
+- Les utilisateurs auront **plus confiance** en un jeu avec de **bons avis**. 
+- **Moins un jeu est cher**, moins il leur semble **risqué de l'acheter**, même s'il a de mauvais avis.
+- Les jeux **les mieux notés** sont **plus mis en avant** par la plateforme Steam. Un utilisateur a plus de chance d'entrer en contact avec des jeux bien notés, et donc de les acheter.
+
+Cependant, les jeux n'ayant **que des notes positives** sont **moins possédés**. Il est très probable que ces deux faits soient corrélés : si un jeu n'a **aucun avis négatif**, c'est souvent un signe que **peu de personnes l'ont acheté**. À partir d'un certains nombre d'achats et donc de votes, il y a généralement **au moins une personne qui n'a pas apprécié** le jeu. Il est donc possible que, **parce que ces jeux ne sont pas très possédés**, ils n'ont **pas encore reçu d'avis négatif**.
+
+Il serait toutefois intéressant de savoir **comment** est déterminée **l'estimation du nombre de possesseurs**. Il est en effet possible que les **relations de causalité** que nous avons remarquées soient **inversées** si cette estimation est **basée sur le prix du jeu et les avis qu'il a reçus**.
+
+Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus cher** ont plus réfléchi à cet achat, qu'ils sont **moins suceptibles d'être déçus**, et que c'est pour cela qu'ils ont un **avis positif** sur le jeu.
+
+---
+
