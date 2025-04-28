@@ -1,18 +1,23 @@
-
 ---
-title: "Rapport d'exploration - HLTB"
-
+title: "Rapport d'exploration - Temps de jeu"
+title: "IF36_Markdown"
+author: "In the R - Link In Pipe"
+date: "2025-04-28"
+always_allow_html: true
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-## Le genre d’un jeu influence-t-il sa durée de complétion ?
+# Le genre d’un jeu influence-t-il sa durée de complétion ?
 
-### Hypothèse
+## Hypothèse
 
 Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
 
 ---
 ## Code
-
+```{r}
 library(dplyr)
 library(stringr)
 library(tidyr)
@@ -23,8 +28,11 @@ library(ggplot2)
 
 hltb <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
 # hltb <- read.csv("hltb_clean.csv", stringsAsFactors = FALSE)
+```
 
-# 1. Convertir les durées textuelles en minutes
+
+### 1. Convertir les durées textuelles en minutes
+```{r}
 convert_to_minutes <- function(time_str) {
   if (is.na(time_str) || time_str == "" || grepl("--", time_str)) return(NA)
   h <- as.numeric(str_extract(time_str, "\\d+(?=h)"))
@@ -33,25 +41,33 @@ convert_to_minutes <- function(time_str) {
   m[is.na(m)] <- 0
   return(h * 60 + m)
 }
+```
 
-# 2. Appliquer la conversion
+### 2. Appliquer la conversion
+```{r}
 hltb <- hltb %>%
   mutate(
     main_story_min = sapply(main_story, convert_to_minutes),
     extras_min = sapply(extras, convert_to_minutes),
     completionist_min = sapply(completionist, convert_to_minutes)
   )
+```
 
-# 3. Nettoyer les lignes valides
+### 3. Nettoyer les lignes valides
+```{r}
 cleaned <- hltb %>%
   filter(!is.na(main_story_min) | !is.na(extras_min) | !is.na(completionist_min))
+```
 
-# 4. Générer les genres décomposés
+### 4. Générer les genres décomposés
+```{r}
 genres_expanded <- cleaned %>%
   separate_rows(Genres, sep = ",\\s*") %>%
   mutate(Genres = str_trim(Genres))
+```
 
-# 5. Générer les 4 Sankey sélectionnés
+### 5. Générer les 4 Sankey sélectionnés
+```{r}
 selected_genres <- c("First-Person", "Action", "Shooter", "Open World")
 
 plots <- list()
@@ -95,9 +111,9 @@ for (genre in selected_genres) {
   
   plots[[genre]] <- sankey
 }
+```
 
-
-# 6. Afficher tous les Sankey côte à côte dans le Viewer R
+### 6. Afficher tous les Sankey côte à côte dans le Viewer R
 browsable(
   div(
     style = "display: flex; flex-wrap: wrap; gap: 20px;",
@@ -115,7 +131,7 @@ knitr::include_graphics("tps_moy_genre_mode.png")
 
 ---
 
-### Interprétation
+## Interprétation
 
 Ce graphique permet de comparer le **temps de jeu moyen par genre** selon trois modes de complétion : `main_story`, `extras` et `completionist`.
 
@@ -130,13 +146,14 @@ Ces résultats confirment que le genre du jeu est un bon prédicteur de sa duré
 ---
 
 
-```
 
 ---
 
-## Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
+# Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
 
 Pour répondre à cette question, nous cherchons à réaliser un histogramme comparant les avis des joueurs au temps de jeu moyen et médian passé sur les jeux.
+
+## Code
 
 ### Filtrage des données
 
