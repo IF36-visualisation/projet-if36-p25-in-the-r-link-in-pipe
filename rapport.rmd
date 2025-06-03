@@ -4,8 +4,31 @@ author: "In the R - Link In Pipe"
 date: "2025-04-28"
 always_allow_html: true
 output:
+  prettydoc::html_pretty:
+    theme: cayman        # autres choix : architect, tactile, leonids
+    toc: true            # table des matières 
   pdf_document: default
-  html_document: default
+---
+```{r}
+#Ignorer la ligne
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+---
+
+#Introduction
+
+Les jeux vidéo constituent aujourd’hui un objet d’étude de premier plan : ils mobilisent des enjeux économiques supérieurs à ceux du cinéma et de la musique, nourrissent une industrie technologique de pointe et s’inscrivent au cœur de problématiques d’ingénierie (grandes volumétries de données, optimisation d’algorithmes de recommandation, architecture distribuée des plateformes, etc.).
+Dans ce contexte, notre travail vise à caractériser et modéliser la durée de complétion des jeux à partir de trois sources complémentaires :
+
+HowLongToBeat — Video Games Playtime (données déclaratives des joueurs, 2023) ;
+
+OpenCritic Ratings (agrégation de la presse spécialisée, fév. 2023) ;
+
+Steam Store Games (télémétrie de jeu, prix et popularité, 2019).
+
+En confrontant temps déclarés, temps réellement passés, évaluations utilisateur et critiques professionnelles, nous cherchons à identifier les déterminants – techniques, ludiques ou économiques – qui orientent la durée d’engagement d’un joueur sur un titre donné.
+
 ---
 
 # Le genre d’un jeu influence-t-il sa durée de complétion ?
@@ -21,8 +44,14 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 
+
 # Lecture du fichier CSV
 df <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
+
+# ---- filtre ASCII anti-LaTeX -------------------------------------------------
+is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
+if ("Name" %in% names(df)) df <- df %>% filter(is_ascii(Name))
+# ------------------------------------------------------------------------------
 
 # Fonction robuste de conversion "23h 17m" -> heures décimales
 convert_to_hours <- function(time_str) {
@@ -103,7 +132,7 @@ Pour répondre à cette question, nous cherchons à réaliser un histogramme com
 ### Filtrage des données
 
 ```{r}
-ratings_playtime <- read.csv("steam.csv") %>% filter(average_playtime != 0) %>% mutate(
+ratings_playtime <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv") %>% filter(average_playtime != 0) %>% mutate(
   average_playtime_hours = round(average_playtime / 60, 2),
   median_playtime_hours = round(median_playtime / 60, 2),
   percent_positive_ratings = round(100 * positive_ratings / (positive_ratings + negative_ratings))
@@ -194,7 +223,11 @@ library(ggplot2)
 library(stringr)
 
 # Charger les données depuis le CSV
-steam <- read.csv("/Users/tifenn/Downloads/rapport/steam.csv") # chemin local
+steam <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv") # chemin local
+# ---- filtre ASCII anti-LaTeX -------------------------------------------------
+is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
+steam    <- steam %>% filter(is_ascii(name))
+# ------------------------------------------------------------------------------
 
 # Nettoyer les genres : extraire le premier genre
 steam <- steam %>%
@@ -301,7 +334,13 @@ library(magrittr)
 library(tidyr)
 
 # On charge le fichier csv
-steam <- read.csv("/Users/lucilepereira/Library/Mobile Documents/com~apple~CloudDocs/Cours /IF36/Projet/Data/steam.csv")
+steam <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv")
+
+# ---- filtre ASCII anti-LaTeX -------------------------------------------------
+is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
+steam    <- steam %>% filter(is_ascii(name))
+# ------------------------------------------------------------------------------
+
 
 # On ne garde que les variables dont on a besoin (avis, note, nombre de possesseurs)
 steam_ratings_price_owners <- steam %>%
@@ -375,5 +414,68 @@ Il serait toutefois intéressant de savoir **comment** est déterminée **l'esti
 
 Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus cher** ont plus réfléchi à cet achat, qu'ils sont **moins suceptibles d'être déçus**, et que c'est pour cela qu'ils ont un **avis positif** sur le jeu.
 
+
 ---
 
+# Complément : Corrélations multivariées (heatmap)
+
+Ce complément permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
+
+```{r}
+library(dplyr); library(tidyr); library(ggplot2); library(stringr)
+
+steam_raw <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv",
+                      stringsAsFactors = FALSE)
+
+is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
+steam     <- steam_raw %>% filter(is_ascii(name))
+
+steam_num <- steam %>%
+  # médiane des propriétaires (en milliers)
+  separate(owners, c("min_owners","max_owners"), "-", convert = TRUE) %>%
+  mutate(popularite = (min_owners + max_owners)/2 / 1000,
+         average_playtime_h = average_playtime / 60,
+         
+         achievements = achievements,                # déjà numérique dans le csv
+         required_age = as.numeric(required_age),
+         price = price) %>%
+  # variables retenues
+  select(average_playtime_h, popularite, positive_ratings, price) %>%
+  drop_na()
+
+# --- Matrice de corrélation ---------------------------------------------------
+mat_corr  <- cor(steam_num, use = "pairwise.complete.obs")
+
+corr_long <- as.data.frame(as.table(mat_corr)) |>
+  rename(Var1 = Var1, Var2 = Var2, Corr = Freq)
+
+# --- Heat-map -----------------------------------------------------------------
+ggplot(corr_long, aes(Var1, Var2, fill = Corr)) +
+  geom_tile(color = "grey90") +
+  geom_text(aes(label = sprintf("%.2f", Corr)), colour = "black", size = 3) +
+  scale_fill_gradient2(
+    low  = "#ff4500",
+    mid  = "#e0f3ff",   # bleu très pâle pour ~0
+    high = "#0074ff",
+    limits = c(-1, 1),
+    midpoint = 0,
+    name = "r"
+  ) +
+  labs(title = "Matrice de corrélation – variables clés (Steam)",
+       x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title  = element_text(hjust = .5, face = "bold"))
+
+```
+
+## Interprétation des résultats
+
+
+La corrélation très forte ( r ≈ 0,76 ) entre popularité (nombre de possesseurs) et positive_ratings confirme qu’un jeu largement diffusé reçoit mécaniquement davantage d’avis positifs ; on retrouve ici l’effet « plus on est joué, plus on est noté ».
+
+En revanche, le temps moyen de jeu (average_playtime_h) n’est pratiquement pas corrélé à la popularité ( r ≈ 0,11 ) ni aux évaluations ( r ≈ 0,09 ) : un titre peut donc être massivement possédé et plébiscité sans pour autant retenir longtemps ses joueurs, ce qui nuance l’idée qu’un bon accueil garantirait un engagement durable.
+
+Le prix montre seulement une corrélation faible et positive avec les évaluations ( r ≈ 0,23 ) : les jeux plus chers sont légèrement mieux notés, possiblement parce qu’il s’agit de productions premium mieux finies ; toutefois, le lien prix ↔ popularité reste ténu ( r ≈ 0,10 ), suggérant que le tarif n’entrave pas significativement la diffusion lorsqu’un titre dispose d’un bouche-à-oreille favorable.
+
+Enfin, la quasi-absence de rapport entre prix et temps de jeu ( r ≈ -0,03 ) indique que payer plus cher n’offre pas nécessairement une expérience plus longue, ce qui rejoint les modèles contemporains où la valeur perçue repose autant sur la qualité que sur la durée.
