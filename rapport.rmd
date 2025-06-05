@@ -477,3 +477,55 @@ En revanche, le temps moyen de jeu (average_playtime_h) n’est pratiquement pas
 Le prix montre seulement une corrélation faible et positive avec les évaluations ( r ≈ 0,23 ) : les jeux plus chers sont légèrement mieux notés, possiblement parce qu’il s’agit de productions premium mieux finies ; toutefois, le lien prix ↔ popularité reste ténu ( r ≈ 0,10 ), suggérant que le tarif n’entrave pas significativement la diffusion lorsqu’un titre dispose d’un bouche-à-oreille favorable.
 
 Enfin, la quasi-absence de rapport entre prix et temps de jeu ( r ≈ -0,03 ) indique que payer plus cher n’offre pas nécessairement une expérience plus longue, ce qui rejoint les modèles contemporains où la valeur perçue repose autant sur la qualité que sur la durée.
+
+
+---
+
+# Y a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?
+
+```{r}
+# Chargement du fichier
+df <- read_csv("steam.csv")
+
+# On ne prend pas en compte les jeux gratuits
+# On convertit l'intervalle de possesseurs en valeur numérique moyenne
+# On convertit le temps de jeu en heures
+df <- df %>%
+  filter(price > 0) %>%
+  mutate(
+    owners_min = as.numeric(sub("-.*", "", owners)),
+    owners_max = as.numeric(sub(".*-", "", owners)),
+    owners_mean = (owners_min + owners_max) / 2,
+    average_playtime_hours = average_playtime / 60
+  )
+
+# Sélection des 20 jeux payants les plus possédés
+top_games <- df %>%
+  arrange(desc(owners_mean)) %>%
+  slice_head(n = 20)
+```
+
+## Graphique
+
+```{r}
+ggplot(top_games,
+       aes(area = owners_mean, fill = average_playtime_hours, label = name)) +
+  geom_treemap() +
+  geom_treemap_text(
+    colour = "white",
+    place = "center",
+    grow = TRUE,
+    reflow = TRUE
+  ) +
+  scale_fill_gradient(low = "lightblue",
+                      high = "darkblue",
+                      name = "Temps de jeu moyen (heures)") +
+  labs(title = "Les 20 jeux Steam les plus vendus",
+       subtitle = "possession vs. temps de jeu moyen",
+       caption = "Source : steam.csv") +
+  theme_minimal()
+```
+
+## Interprétation
+
+On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
