@@ -127,10 +127,6 @@ Ces résultats confirment que le genre du jeu est un bon prédicteur de sa duré
 
 Pour répondre à cette question, nous cherchons à réaliser un histogramme comparant les avis des joueurs au temps de jeu moyen et médian passé sur les jeux.
 
-## Code
-
-### Filtrage des données
-
 ```{r}
 ratings_playtime <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv") %>% filter(average_playtime != 0) %>% mutate(
   average_playtime_hours = round(average_playtime / 60, 2),
@@ -140,8 +136,6 @@ ratings_playtime <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.cs
              average_playtime_hours,
              median_playtime_hours)
 ```
-
-### Création des buckets d'avis positifs
 
 ```{r}
 ratings_summary <- ratings_playtime %>%
@@ -160,7 +154,7 @@ ratings_summary <- ratings_playtime %>%
   )
 ```
 
-### Génération du graphique
+## Graphique
 
 ```{r, fig.width=12, fig.height=7}
 ggplot(ratings_summary, aes(x = rating_bucket)) +
@@ -206,6 +200,10 @@ ggplot(ratings_summary, aes(x = rating_bucket)) +
     panel.grid.minor = element_blank()
   )
 ```
+
+## Interprétation
+
+D'après le temps de jeu moyen, plus les avis sont positifs plus les jeux sont joués. Néanmoins, d'après le temps jeu médian, les avis, qu'ils soient très positifs ou très négatifs ou dans l'entre-deux, n'influencent pas le temps passé sur les jeux. Donc, très peu de joueurs se fient aux avis Steam ou ils préfèrent jouer quelques heures avant d'aller lire les avis. Les avis Steam ne sont peut-être pas aussi pertinents que ceux rédigés par la presse et les magazines spécialisés.
 
 ---
 
