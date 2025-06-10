@@ -101,6 +101,7 @@ D'une façon générale nous voulons comparer les temps moyens de complétion :
 
 Nous pouvons aussi comparer le taux de complétion par rapport au prix du jeu pour voir si les joueurs sont plus investis en payant plus cher.
 Nous souhaitons aussi comparer les temps de jeu du dataset Steam avec le dataset HowLongToBeat pour vérifier si les joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".
+Enfin, nous voudrions comparer les avis des joueurs avec ceux de la presse spécialisée, depuis les datasets de How Long To Beat et de OpenCritics.
 
 ---
 
