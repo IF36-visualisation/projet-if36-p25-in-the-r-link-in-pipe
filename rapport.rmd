@@ -1,7 +1,7 @@
 ---
 title: "Rapport d'exploration - Temps de jeu"
 author: "In the R - Link In Pipe"
-date: "2025-04-28"
+date: "2025-06-11"
 always_allow_html: true
 output:
   prettydoc::html_pretty:
@@ -9,14 +9,49 @@ output:
     toc: true            # table des matières 
   pdf_document: default
 ---
-```{r}
+```{r mise_en_place, include=FALSE}
 #Ignorer la ligne
 knitr::opts_chunk$set(echo = FALSE)
+
+# Chargement des bibliothèques
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+
+
+# Chargement des fichiers (chemins locaux)
+steam <- read.csv("./data/steam.csv", stringsAsFactors = FALSE)
+hltb <- read.csv("./data/hltb_clean.csv", stringsAsFactors = FALSE)
+opencritic <- read.csv("./data/opencritic_rankings_feb_2023.csv", stringsAsFactors = FALSE)
+
+# ---- filtre ASCII anti-LaTeX -------------------------------------------------
+is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
+steam    <- steam %>% filter(is_ascii(name))
+if ("Name" %in% names(hltb)) hltb <- hltb %>% filter(is_ascii(Name))
+# ------------------------------------------------------------------------------
+
+# Fonction robuste de conversion "23h 17m" -> heures décimales
+convert_to_hours <- function(time_str) {
+  time_str[time_str == "" | time_str == "N/A" | is.na(time_str)] <- NA
+  h <- as.numeric(str_extract(time_str, "\\d+(?=h)"))
+  m <- as.numeric(str_extract(time_str, "\\d+(?=m)"))
+  h[is.na(h)] <- 0
+  m[is.na(m)] <- 0
+  result <- ifelse(is.na(time_str), NA, h + m / 60)
+  return(result)
+}
+
+# Conversion des colonnes
+hltb$main_story <- convert_to_hours(hltb$main_story)
+hltb$extras <- convert_to_hours(hltb$extras)
+hltb$completionist <- convert_to_hours(hltb$completionist)
+
 ```
 
 ---
 
-#Introduction
+# Introduction
 
 Les jeux vidéo constituent aujourd’hui un objet d’étude de premier plan : ils mobilisent des enjeux économiques supérieurs à ceux du cinéma et de la musique, nourrissent une industrie technologique de pointe et s’inscrivent au cœur de problématiques d’ingénierie (grandes volumétries de données, optimisation d’algorithmes de recommandation, architecture distribuée des plateformes, etc.).
 Dans ce contexte, notre travail vise à caractériser et modéliser la durée de complétion des jeux à partir de trois sources complémentaires :
@@ -37,61 +72,34 @@ En confrontant temps déclarés, temps réellement passés, évaluations utilisa
 
 Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
 
-```{r}
-# Chargement des bibliothèques
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(stringr)
+## Graphique
 
-
-# Lecture du fichier CSV
-df <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/hltb_clean.csv", stringsAsFactors = FALSE)
-
-# ---- filtre ASCII anti-LaTeX -------------------------------------------------
-is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
-if ("Name" %in% names(df)) df <- df %>% filter(is_ascii(Name))
-# ------------------------------------------------------------------------------
-
-# Fonction robuste de conversion "23h 17m" -> heures décimales
-convert_to_hours <- function(time_str) {
-  time_str[time_str == "" | time_str == "N/A" | is.na(time_str)] <- NA
-  h <- as.numeric(str_extract(time_str, "\\d+(?=h)"))
-  m <- as.numeric(str_extract(time_str, "\\d+(?=m)"))
-  h[is.na(h)] <- 0
-  m[is.na(m)] <- 0
-  result <- ifelse(is.na(time_str), NA, h + m / 60)
-  return(result)
-}
-
-# Conversion des colonnes
-df$main_story <- convert_to_hours(df$main_story)
-df$extras <- convert_to_hours(df$extras)
-df$completionist <- convert_to_hours(df$completionist)
+```{r genre_duree_completion, message=FALSE, warning=FALSE}
 
 # Extraction du genre principal (1er genre listé)
-df$Primary_Genre <- sapply(strsplit(df$Genres, ","), function(x) trimws(x[1]))
+hltb_first_genre <- hltb
+hltb_first_genre$Primary_Genre <- sapply(strsplit(hltb_first_genre$Genres, ","), function(x) trimws(x[1]))
 
 # Sélection de 5 genres populaires
 genres_to_keep <- c("Shooter", "Adventure", "Role-Playing", "Platformer", "Racing")
-df_filtered <- df %>%
+hltb_filtered <- hltb_first_genre %>%
   filter(Primary_Genre %in% genres_to_keep)
 
 # Mise au format long
-df_long <- df_filtered %>%
+hltb_long <- hltb_filtered %>%
   select(Primary_Genre, main_story, extras, completionist) %>%
   pivot_longer(cols = c(main_story, extras, completionist),
                names_to = "Mode", values_to = "Temps_heures")
 
 # Calcul des moyennes
-df_summary <- df_long %>%
+hltb_summary <- hltb_long %>%
   filter(!is.na(Temps_heures)) %>%
   group_by(Primary_Genre, Mode) %>%
   summarise(Temps_moyen = mean(Temps_heures), .groups = "drop")
 
 
 # Barplot final
-ggplot(df_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
+ggplot(hltb_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Temps de jeu moyen par genre et par mode",
        x = "Genre principal",
@@ -119,25 +127,24 @@ Ces résultats confirment que le genre du jeu est un bon prédicteur de sa duré
 
 ---
 
-
-
----
-
 # Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
+
+## Hypothèse
 
 Pour répondre à cette question, nous cherchons à réaliser un histogramme comparant les avis des joueurs au temps de jeu moyen et médian passé sur les jeux.
 
-```{r}
-ratings_playtime <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv") %>% filter(average_playtime != 0) %>% mutate(
+
+## Graphique
+
+```{r avis_temps_jeu, message=FALSE, warning=FALSE, fig.width=12, fig.height=7}
+ratings_playtime <- steam %>% filter(average_playtime != 0) %>% mutate(
   average_playtime_hours = round(average_playtime / 60, 2),
   median_playtime_hours = round(median_playtime / 60, 2),
   percent_positive_ratings = round(100 * positive_ratings / (positive_ratings + negative_ratings))
 ) %>% select(percent_positive_ratings,
              average_playtime_hours,
              median_playtime_hours)
-```
 
-```{r}
 ratings_summary <- ratings_playtime %>%
   mutate(
     rating_bucket = cut(
@@ -152,11 +159,7 @@ ratings_summary <- ratings_playtime %>%
     average_playtime = mean(average_playtime_hours, na.rm = TRUE),
     median_playtime = median(median_playtime_hours, na.rm = TRUE)
   )
-```
 
-## Graphique
-
-```{r, fig.width=12, fig.height=7}
 ggplot(ratings_summary, aes(x = rating_bucket)) +
   geom_col(aes(y = average_playtime, fill = "Moyenne"), width = 0.6) +
   geom_col(aes(y = median_playtime, fill = "Médiane"), width = 0.3) +
@@ -207,53 +210,44 @@ D'après le temps de jeu moyen, plus les avis sont positifs plus les jeux sont j
 
 ---
 
-# Question : Il y a t il une corrélation entre le temps de jeu et son genre ?
+# Il y a t il une corrélation entre le temps de jeu et son genre ?
 
 ## Hypothèse
 
 Pour cette analyse, nous avons voulu identifier quels étaient les jeux présentant les **temps de jeu moyens les plus élevés** sur Steam et **les genres associés**.  
 **Notre hypothèse** est que certains types de jeux, comme les **jeux de simulation** ou les **multijoueurs**, pourraient inciter à des sessions de jeu beaucoup plus longues que d’autres genres plus rapides ou épisodiques.
 
+## Premier graphique
 
-```{r genre_les_plus_joues, message=FALSE, warning=FALSE}
-library(dplyr)
-library(ggplot2)
-library(stringr)
+```{r temps_jeu_genre, message=FALSE, warning=FALSE}
 
-# Charger les données depuis le CSV
-steam <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv") # chemin local
-# ---- filtre ASCII anti-LaTeX -------------------------------------------------
-is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
-steam    <- steam %>% filter(is_ascii(name))
-# ------------------------------------------------------------------------------
-
-# Nettoyer les genres : extraire le premier genre
-steam <- steam %>%
-  filter(!is.na(genres), average_playtime > 0) %>%
-  mutate(
-    genre_main = str_split(genres, ";", simplify = TRUE)[,1],
-    average_playtime_hours = average_playtime / 60
-  )
-
-# Calculer la moyenne du temps de jeu par genre
-genre_summary <- steam %>%
-  group_by(genre_main) %>%
-  summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
-  arrange(desc(mean_playtime))
-
-# Afficher le graphique
-ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
-  geom_col(show.legend = FALSE) +
-  coord_flip() +
-  labs(
-    title = "Temps moyen de jeu par genre",
-    x = "Genre",
-    y = "Temps moyen (heures)"
-  ) +
-  theme_minimal()
+# # Nettoyer les genres : extraire le premier genre
+# steam_premier_genre <- steam %>%
+#   filter(!is.na(genres), average_playtime > 0) %>%
+#   mutate(
+#     genre_main = str_split(genres, ";", simplify = TRUE)[,1],
+#     average_playtime_hours = average_playtime / 60
+#   )
+# 
+# # Calculer la moyenne du temps de jeu par genre
+# genre_summary <- steam_premier_genre %>%
+#   group_by(genre_main) %>%
+#   summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
+#   arrange(desc(mean_playtime))
+# 
+# # Afficher le graphique
+# ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
+#   geom_col(show.legend = FALSE) +
+#   coord_flip() +
+#   labs(
+#     title = "Temps moyen de jeu par genre",
+#     x = "Genre",
+#     y = "Temps moyen (heures)"
+#   ) +
+#   theme_minimal()
 ```
 
-### Interprétation des résultats
+## Interprétation
 
 Le graphique **valide notre hypothèse**, montrant clairement que les jeux de type **"Massively Multiplayer"** (MMORPG) et **"Free to Play"** enregistrent les temps de jeu moyens les plus élevés. Cela peut s’expliquer par leur fonctionnement : les MMORPG sont conçus pour retenir les joueurs sur le long terme grâce à des systèmes d’évolution progressive, de missions quotidiennes, d’interactions sociales et d'abonnement. Les jeux Free to Play, souvent multijoueurs eux aussi, encouragent également une forte rétention pour maximiser leur modèle économique basé sur les microtransactions.
 
@@ -261,12 +255,9 @@ Le graphique **valide notre hypothèse**, montrant clairement que les jeux de ty
 
 Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
 
-## Graphique 2
+## Deucième graphique
 
-```{r jeux_plus_joues_par_genre, message=FALSE, warning=FALSE}
-library(dplyr)
-library(ggplot2)
-library(stringr)
+```{r plus_joues_genre, message=FALSE, warning=FALSE}
 
 # Nettoyage : extraire le premier genre
 steam_clean_simple <- steam %>%
@@ -295,7 +286,7 @@ ggplot(top_jeux_simple, aes(x = reorder(name, average_playtime_hours), y = avera
   theme(legend.position = "bottom", legend.text = element_text(size = 8))
 ```
 
-### Interprétation des résultats
+## Interprétation
 
 Le graphique obtenu montre que :
 
@@ -304,11 +295,9 @@ Le graphique obtenu montre que :
 - Les **jeux de genre indépendants (Indie)** orientés du même type figurent parmi les titres les plus joués en termes de durée.
 - Cela **confirme partiellement notre hypothèse** : les genres favorisant **l'exploration** ou **l'investissement dans un personnage** tendent à engendrer des sessions de jeu beaucoup plus longues. **Cependant** nous sommes plutôt surpris de ne pas voir plus de jeux **Multijoueurs** en haut du classement, comme le montrait le premier graphique, qui ont notament une durée de vie quasi **illimité**. 
 
-### Hypothèse 
-
 Nous pouvons formuler l’hypothèse suivante : si le genre "Massively Multiplayer" apparaît très largement en tête dans le graphique 1 (temps moyen par genre), c’est parce que les jeux multijoueurs en ligne sont conçus pour encourager un investissement très long dans la durée (progression continue, événements récurrents, interactions sociales), mais ils restent peu nombreux en nombre de titres comparé aux jeux d'aventure ou free-to-play. Ainsi, dans le graphique 2, les jeux d'aventure et free-to-play dominent car ils sont beaucoup plus représentés dans le catalogue global et certains titres très populaires tirent leur genre vers le haut en termes de temps joué.
 
-### Remarque
+## Remarque
 
 Il est important de préciser que ce dataset date de **2019**.
 Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
@@ -322,23 +311,8 @@ Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Stea
 Nous avons voulu déterminer si le **prix** d’un jeu et **l’avis donné par les joueurs** avaient une influence sur le **nombre de personnes qui achètent le jeu**, mais aussi si il y avait une corrélation entre le **prix** et **l’avis des joueurs**.
 Nous pensons que les jeux les **moins chers** et les **mieux notés** sont ceux qui sont les plus achetés. 
 
-## Code 
-```{r}
-
-# On importe les librairies nécessaires
-library(ggplot2)
-library(dplyr)
-library(magrittr)
-library(tidyr)
-
-# On charge le fichier csv
-steam <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv")
-
-# ---- filtre ASCII anti-LaTeX -------------------------------------------------
-is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
-steam    <- steam %>% filter(is_ascii(name))
-# ------------------------------------------------------------------------------
-
+## Premier graphique 
+```{r prix_note_possesseurs, message=FALSE, warning=FALSE}
 
 # On ne garde que les variables dont on a besoin (avis, note, nombre de possesseurs)
 steam_ratings_price_owners <- steam %>%
@@ -386,7 +360,7 @@ graphe
 
 ```
 
-## Interprétation des résultats
+## Interprétation
 
 Le graphique obtenu montre que :
 
@@ -397,9 +371,7 @@ Le graphique obtenu montre que :
 - Une majorité des jeux ont un **prix en dessous de 50 dollars**, et même **en dessous de 25 dollars**.
 - On remarque que **les prix finissant par 5 ou 0** sont **plus communs** que les autres, notamment **à partir de 30 dollars**. 
 
-Cela **confirme partiellement** notre hypothèse : on voit que **moins un jeu est cher** et **plus il a un pourcentage élevé d'avis positifs**, **plus il aura de chances d'être possédé**. On voit aussi apparaître une **corrélation entre note et prix**.
-
-## Hypothèse 
+Cela **confirme partiellement** notre hypothèse : on voit que **moins un jeu est cher** et **plus il a un pourcentage élevé d'avis positifs**, **plus il aura de chances d'être possédé**. On voit aussi apparaître une **corrélation entre note et prix**. 
 
 Nous pouvons donc partir du principe que lorsqu'un jeu est peu cher, et surtout lorsqu'il est gratuit, les utilisateurs vont plus l'acheter. De plus, les utilisateurs auront plus tendance à acheter un jeu s'il est bien noté. Nous pouvons supposer que c'est dû aux faits suivants :
 - Les utilisateurs auront **plus confiance** en un jeu avec de **bons avis**. 
@@ -412,21 +384,11 @@ Il serait toutefois intéressant de savoir **comment** est déterminée **l'esti
 
 Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus cher** ont plus réfléchi à cet achat, qu'ils sont **moins suceptibles d'être déçus**, et que c'est pour cela qu'ils ont un **avis positif** sur le jeu.
 
+Nous avons ensuite réalisé une heatmap des corrélations multivariées, qui permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
 
----
+## Deuxième graphique
 
-# Complément : Corrélations multivariées (heatmap)
-
-Ce complément permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
-
-```{r}
-library(dplyr); library(tidyr); library(ggplot2); library(stringr)
-
-steam_raw <- read.csv("C:/Users/virgi/Desktop/UTT/IF36/steam.csv/steam.csv",
-                      stringsAsFactors = FALSE)
-
-is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
-steam     <- steam_raw %>% filter(is_ascii(name))
+```{r prix_note_possesseurs_heatmap, message=FALSE, warning=FALSE}
 
 steam_num <- steam %>%
   # médiane des propriétaires (en milliers)
@@ -467,8 +429,7 @@ ggplot(corr_long, aes(Var1, Var2, fill = Corr)) +
 
 ```
 
-## Interprétation des résultats
-
+## Interprétation
 
 La corrélation très forte ( r ≈ 0,76 ) entre popularité (nombre de possesseurs) et positive_ratings confirme qu’un jeu largement diffusé reçoit mécaniquement davantage d’avis positifs ; on retrouve ici l’effet « plus on est joué, plus on est noté ».
 
@@ -478,19 +439,17 @@ Le prix montre seulement une corrélation faible et positive avec les évaluatio
 
 Enfin, la quasi-absence de rapport entre prix et temps de jeu ( r ≈ -0,03 ) indique que payer plus cher n’offre pas nécessairement une expérience plus longue, ce qui rejoint les modèles contemporains où la valeur perçue repose autant sur la qualité que sur la durée.
 
-
 ---
 
 # Y a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?
 
-```{r}
-# Chargement du fichier
-df <- read_csv("steam.csv")
+## Graphique
 
+```{r possesseurs_temps_jeu, message=FALSE, warning=FALSE}
 # On ne prend pas en compte les jeux gratuits
 # On convertit l'intervalle de possesseurs en valeur numérique moyenne
 # On convertit le temps de jeu en heures
-df <- df %>%
+steam_filtered <- steam %>%
   filter(price > 0) %>%
   mutate(
     owners_min = as.numeric(sub("-.*", "", owners)),
@@ -500,13 +459,10 @@ df <- df %>%
   )
 
 # Sélection des 20 jeux payants les plus possédés
-top_games <- df %>%
+top_games <- steam_filtered %>%
   arrange(desc(owners_mean)) %>%
   slice_head(n = 20)
 ```
-
-## Graphique
-
 ```{r}
 ggplot(top_games,
        aes(area = owners_mean, fill = average_playtime_hours, label = name)) +
