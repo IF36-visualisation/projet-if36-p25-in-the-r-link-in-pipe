@@ -221,30 +221,30 @@ Pour cette analyse, nous avons voulu identifier quels étaient les jeux présent
 
 ```{r temps_jeu_genre, message=FALSE, warning=FALSE}
 
-# # Nettoyer les genres : extraire le premier genre
-# steam_premier_genre <- steam %>%
-#   filter(!is.na(genres), average_playtime > 0) %>%
-#   mutate(
-#     genre_main = str_split(genres, ";", simplify = TRUE)[,1],
-#     average_playtime_hours = average_playtime / 60
-#   )
-# 
-# # Calculer la moyenne du temps de jeu par genre
-# genre_summary <- steam_premier_genre %>%
-#   group_by(genre_main) %>%
-#   summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
-#   arrange(desc(mean_playtime))
-# 
-# # Afficher le graphique
-# ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
-#   geom_col(show.legend = FALSE) +
-#   coord_flip() +
-#   labs(
-#     title = "Temps moyen de jeu par genre",
-#     x = "Genre",
-#     y = "Temps moyen (heures)"
-#   ) +
-#   theme_minimal()
+# Nettoyer les genres : extraire le premier genre
+steam_premier_genre <- steam %>%
+  filter(!is.na(genres), average_playtime > 0) %>%
+  mutate(
+    genre_main = str_split(genres, ";", simplify = TRUE)[,1],
+    average_playtime_hours = average_playtime / 60
+  )
+
+# Calculer la moyenne du temps de jeu par genre
+genre_summary <- steam_premier_genre %>%
+  group_by(genre_main) %>%
+  summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
+  arrange(desc(mean_playtime))
+
+# Afficher le graphique
+ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Temps moyen de jeu par genre",
+    x = "Genre",
+    y = "Temps moyen (heures)"
+  ) +
+  theme_minimal()
 ```
 
 ## Interprétation
