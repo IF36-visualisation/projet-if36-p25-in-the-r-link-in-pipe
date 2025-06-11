@@ -546,3 +546,28 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
 Le graphique est assez pertinent pour voir les **extremums**, mais complique la lecture pour les boîtes en elles-mêmes. En effet, le **temps de jeu moyen** pour la majorité des jeux est relativement faible (souvent au alentour de **20h**). Mais certains jeux (typiquement les **MMO ou jeux multijoueurs**) atteignent des temps de jeu particulièrement élevé (plusieurs **milliers d’heures**). De ce fait, l’échelle de l’**axe Y s’étire** énormément, rendant les boxplots écrasés vers le bas.
 
 Étant donné que ces extremum sont très semblables, j'ai décidé de refaire un graphique en adaptant l'axe Y (limité à 100h) pour plus de visibilité :
+
+### Graphique 1.2
+
+```{r plateform_des_jeux2, message=FALSE, warning=FALSE}
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  coord_cartesian(ylim = c(0, 100)) +
+  labs(
+    title = "Temps de jeu par plateforme (jeux Steam)",
+    subtitle = "Distribution des temps de jeu moyens (limités à 100h)",
+    x = "Plateforme",
+    y = "Temps moyen (heures)",
+    fill = "Plateforme"
+  ) +
+  theme_minimal()
+```
+
+### Interprétation des résultats 
+
+Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les différences de temps de jeu moyen selon les plateformes supportées par les jeux Steam :
+
+- **Windows** semble être la plate-forme la plus courante, elle affiche la plus grande variabilité de temps de jeu ;
+- **Mac** montre des temps de jeu en moyenne plus élevés que Linux ;
+
+Ces variations peuvent s'expliquer de différentes manières. Cependant, la lisibilité de ce graphique me semblant encore assez complexe, j'ai décidé de l'adapter pour essayer d'y voir un peu plus clair d'abord, notamment en prenant une **échelle logarithmique**, et un autre type de graphique : le **Violon plot**.
