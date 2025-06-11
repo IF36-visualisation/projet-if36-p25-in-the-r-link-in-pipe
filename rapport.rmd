@@ -571,3 +571,40 @@ Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les di
 - **Mac** montre des temps de jeu en moyenne plus élevés que Linux ;
 
 Ces variations peuvent s'expliquer de différentes manières. Cependant, la lisibilité de ce graphique me semblant encore assez complexe, j'ai décidé de l'adapter pour essayer d'y voir un peu plus clair d'abord, notamment en prenant une **échelle logarithmique**, et un autre type de graphique : le **Violon plot**.
+
+
+### Graphique 2
+
+```{r plateform_des_jeux3, message=FALSE, warning=FALSE}
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_violin(trim = FALSE, alpha = 0.6) +
+  scale_y_log10() +
+  labs(title = "Distribution des temps de jeu moyens par plateforme (violin plot)",
+       y = "Temps de jeu (heures, log)", x = "Plateforme") +
+  theme_minimal()
+```
+
+### Interprétation des résultats 
+
+Sur cette forme de graphique, nous avons plusieurs choses :
+- En premier, **l'échelle** : c'est une échelle logarithmique, cela signifie qu’au lieu d’avoir un axe linéaire (1, 2, 3, ...), on a ici une échelle de puissance de 10 :
+    - 1e-01 → 0,1 heure (≈ 6 minutes)
+    - 1e+00 → 1 heure
+    - 1e+01 → 10 heures
+    - 1e+02 → 100 heures
+    - 1e+03 → 1000 heures (= plus de 40 jours) 
+
+L'**avantage** de cette échelle est qu'elle **compresse visuellement les valeurs extrêmes** et **rend plus lisibles les tendances générales**, même en présence de très gros outliers.
+
+- En deuxième, la **largeur** du violon : elle indique à chaque hauteur la **densité de jeux** à ce niveau de durée. Ainsi : 
+    - Si le violon est large vers 1e+01, cela signifie que de nombreux jeux ont une durée moyenne autour de 10h.
+    - Si le violon est étroit à un endroit, il y a peu de jeux avec ce temps de jeu moyen.
+    
+Maintenant, revenons à nos **résultats** :
+- Sur les **3 plateformes**, la majorité des jeux ont un **temps moyen compris entre 1h et 10h** (zone la plus large, centrée vers 1e+00 à 1e+01).
+- **Quelques jeux dépassent** les 100h voire 1000h, mais ils sont très rares : c’est la partie très fine et étirée du haut du violon.
+- Les **distributions sont globalement similaires** entre les 3 plateformes :
+    - **Windows** a une base légèrement plus étalée vers le bas, ce qui suggère qu’il y a un peu plus de jeux avec très peu de temps de jeu moyen.
+    - **Linux** et **Mac** semblent un peu plus concentrés autour d’un cœur de distribution (≈ 5-10h).
+
+(EN COURS)
