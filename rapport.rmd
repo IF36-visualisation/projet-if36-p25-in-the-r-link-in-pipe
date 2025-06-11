@@ -485,3 +485,64 @@ ggplot(top_games,
 ## Interprétation
 
 On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
+
+
+## Question : Les temps de complétion varient-ils selon la plateforme ?
+
+### Hypothèse
+
+Certains jeux pourraient être plus longs sur **Windows** que sur **Mac** ou **Linux**, en raison d’une **optimisation différente**, d’un **public distinct** ou d’un **catalogue partiel**. Nous faisons l’hypothèse que les jeux disponibles sur Windows sont en moyenne plus longs à jouer, car c’est la plateforme la plus courante, avec le catalogue le plus complet.
+
+### Graphique 1
+
+```{r plateform_des_jeux, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+
+# Nettoyage de base
+steam <- steam %>%
+  filter(average_playtime > 0) %>% # on garde les jeux joués
+  mutate(
+    average_playtime_hours = average_playtime / 60,
+    windows = str_detect(platforms, "windows"),
+    mac     = str_detect(platforms, "mac"),
+    linux   = str_detect(platforms, "linux")
+  )
+
+# Création du dataset long : une ligne par plateforme présente
+steam_long <- steam %>%
+  select(name, average_playtime_hours, windows, mac, linux) %>%
+  pivot_longer(cols = c(windows, mac, linux),
+               names_to = "platform",
+               values_to = "available") %>%
+  filter(available == TRUE)
+
+# Résumé par plateforme
+platform_summary <- steam_long %>%
+  group_by(platform) %>%
+  summarise(
+    n_jeux = n(),
+    moyenne_heures = mean(average_playtime_hours),
+    mediane_heures = median(average_playtime_hours)
+  )
+
+# Affichage du graphique
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  scale_y_continuous(trans = "sqrt") +
+  labs(
+    title = "Temps de jeu moyen par plateforme (jeux Steam)",
+    x = "Plateforme",
+    y = "Temps moyen (heures)",
+    fill = "Plateforme"
+  ) +
+  theme_minimal()
+```
+
+### Remarque
+
+Le graphique est assez pertinent pour voir les **extremums**, mais complique la lecture pour les boîtes en elles-mêmes. En effet, le **temps de jeu moyen** pour la majorité des jeux est relativement faible (souvent au alentour de **20h**). Mais certains jeux (typiquement les **MMO ou jeux multijoueurs**) atteignent des temps de jeu particulièrement élevé (plusieurs **milliers d’heures**). De ce fait, l’échelle de l’**axe Y s’étire** énormément, rendant les boxplots écrasés vers le bas.
+
+Étant donné que ces extremum sont très semblables, j'ai décidé de refaire un graphique en adaptant l'axe Y (limité à 100h) pour plus de visibilité :
