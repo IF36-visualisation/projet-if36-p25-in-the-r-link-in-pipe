@@ -343,7 +343,8 @@ steam_ratings_price_owners <- steam_ratings_price_owners %>%
 graphe <- ggplot(steam_ratings_price_owners,
                  aes(x = price,
                      y = ratings,
-                     color = owners)) +
+                     color = owners,
+                     alpha = owners)) +
   geom_point()
 
 # On inverse les couleurs du dégradé, onveut qu'un nombre plus élevé = une couleur plus sombre
