@@ -255,7 +255,7 @@ Le graphique **valide notre hypothèse**, montrant clairement que les jeux de ty
 
 Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
 
-## Deucième graphique
+## Deuxième graphique
 
 ```{r plus_joues_genre, message=FALSE, warning=FALSE}
 
