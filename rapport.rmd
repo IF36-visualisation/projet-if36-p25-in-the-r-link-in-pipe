@@ -18,7 +18,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(stringr)
-
+library(treemapify)
 
 # Chargement des fichiers (chemins locaux)
 steam <- read.csv("./data/steam.csv", stringsAsFactors = FALSE)
@@ -27,8 +27,8 @@ opencritic <- read.csv("./data/opencritic_rankings_feb_2023.csv", stringsAsFacto
 
 # ---- filtre ASCII anti-LaTeX -------------------------------------------------
 is_ascii <- function(x) !grepl("[^\\x00-\\x7F]", x)
-steam    <- steam %>% filter(is_ascii(name))
-if ("Name" %in% names(hltb)) hltb <- hltb %>% filter(is_ascii(Name))
+steam_clean_ascii    <- steam %>% filter(is_ascii(name))
+if ("Name" %in% names(hltb)) hltb_clean_ascii <- hltb %>% filter(is_ascii(Name))
 # ------------------------------------------------------------------------------
 
 # Fonction robuste de conversion "23h 17m" -> heures décimales
@@ -77,7 +77,7 @@ Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de c
 ```{r genre_duree_completion, message=FALSE, warning=FALSE}
 
 # Extraction du genre principal (1er genre listé)
-hltb_first_genre <- hltb
+hltb_first_genre <- hltb_clean_ascii
 hltb_first_genre$Primary_Genre <- sapply(strsplit(hltb_first_genre$Genres, ","), function(x) trimws(x[1]))
 
 # Sélection de 5 genres populaires
@@ -343,8 +343,7 @@ steam_ratings_price_owners <- steam_ratings_price_owners %>%
 graphe <- ggplot(steam_ratings_price_owners,
                  aes(x = price,
                      y = ratings,
-                     color = owners,
-                     alpha = owners)) +
+                     color = owners)) +
   geom_point()
 
 # On inverse les couleurs du dégradé, onveut qu'un nombre plus élevé = une couleur plus sombre
