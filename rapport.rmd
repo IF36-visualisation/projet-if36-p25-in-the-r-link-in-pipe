@@ -54,15 +54,106 @@ if ("Name" %in% names(hltb)) hltb_clean_ascii <- hltb %>% filter(is_ascii(Name))
 # Introduction
 
 Les jeux vidéo constituent aujourd’hui un objet d’étude de premier plan : ils mobilisent des enjeux économiques supérieurs à ceux du cinéma et de la musique, nourrissent une industrie technologique de pointe et s’inscrivent au cœur de problématiques d’ingénierie (grandes volumétries de données, optimisation d’algorithmes de recommandation, architecture distribuée des plateformes, etc.).
-Dans ce contexte, notre travail vise à caractériser et modéliser la durée de complétion des jeux à partir de trois sources complémentaires :
+Dans ce contexte, notre travail vise à caractériser et modéliser la durée de complétion des jeux, ainsi d'analyser comment les avis sont donnés.
 
-HowLongToBeat — Video Games Playtime (données déclaratives des joueurs, 2023) ;
+## Données
 
-OpenCritic Ratings (agrégation de la presse spécialisée, fév. 2023) ;
+### Sources
 
-Steam Store Games (télémétrie de jeu, prix et popularité, 2019).
+Ainsi, notre objectif principal est d'analyser le temps de complétion de différents jeus vidéos afin de voir par quoi il est impacté. Pour ce faire, nous avons d'abord sélectionné un jeu de données appelé Video Games Playtime qui remplissait nos critères. Nous l'avons trouvé sur [Kaggle](https://www.kaggle.com/datasets/baraazaid/how-long-to-beat-video-games), où son auteur est [baraazaid](https://www.kaggle.com/baraazaid). ll est basé sur les données du site [How Long To Beat](https://howlongtobeat.com), qui recense des données sur le temps nécessaire pour terminer un jeu vidéo, selon différents styles de jeu. Ce jeu de données a été mis à jour pour la dernière fois en **2023**. Le fichier, [`video_games_playtime.jsonlines.zip`](](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/video_games_playtime.jsonlines.zip)), contient **60 410 entrées**.
 
-En confrontant temps déclarés, temps réellement passés, évaluations utilisateur et critiques professionnelles, nous cherchons à identifier les déterminants – techniques, ludiques ou économiques – qui orientent la durée d’engagement d’un joueur sur un titre donné.
+Afin d’enrichir notre analyse et de croiser les points de vue entre joueurs et professionnels, nous avons aussi sélectionné un deuxième jeu de données appelé **OpenCritic Ratings for all games and platforms**, disponible sur [Kaggle](https://www.kaggle.com/datasets/patkle/opencritic-ratings-for-all-games-and-platforms) où son auteur est [Patrick Klein](https://www.kaggle.com/patkle). Les données de ce dataset datent de **février 2023** et proviennent de [OpenCritic](https://opencritic.com), un site qui crée des notes pour les jeux en se basant sur des évaluations issues de la presse spécialisée. Le fichier, [`opencritic_rankings_feb_2023.csv`](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/opencritic_rankings_feb_2023.csv), contient **13111 entrées**.
+
+Pour élargir notre perspective sur les comportements de jeu et les durées de complétion, nous avons également choisi un **troisième jeu de données** extrait en **2019** de la plateforme **Steam**, souvent utilisée comme référence dans l’analyse des tendances vidéoludiques. Il est disponible sur [Kaggle](https://www.kaggle.com/datasets/nikdavis/steam-store-games?resource=download&select=steam.csv), où son auteur est [Nik Davis](https://www.kaggle.com/nikdavis). Ce fichier, intitulé [`steam.csv`](https://github.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/blob/master/data/steam.zip), contient des données publiques relatives à plus de **27 000 jeux** publiés sur Steam. 
+
+### Video Games Playtime
+
+Plusieurs variables nous intéressent :
+
+- `Single-Player_Main Story_Average` : temps moyen pour terminer l’histoire principale en solo.
+- `Single-Player_Main + Extras_Average` : temps moyen pour l’histoire principale avec le contenu additionnel.
+- `Single-Player_Completionist_Average` : temps moyen pour terminer le jeu à 100%.
+- `Single-Player_All PlayStyles_Average` : temps moyen tous styles de joueurs confondus.
+- `Single-Player_Main Story_Rushed` et `Single-Player_Main Story_Leisure` : estiment les temps pour une complétion rapide ou détendue.
+- Pour chaque temps de jeu, des variables supplémentaires telles que `Polled`, `Median`, `Rushed`, `Leisure` permettent d’explorer :
+  - Le nombre de joueurs sondés (`Polled`)
+  - La médiane (`Median`)
+  - Le style de jeu rapide (`Rushed`) ou détendu (`Leisure`)
+
+Autres variables notables :
+- `Genres` : liste des genres associés à chaque jeu (type `character`).
+- `Review_score` : note moyenne attribuée par les joueurs (type `integer`, en pourcentage).
+- `Release_date` : date de sortie du jeu (type `character`, au format `YYYY-MM-DD`).
+- `Platform` : liste des plateformes sur lesquelles le jeu est disponible (type `character`).
+- `Name` : titre du jeu (type `character`).
+
+### OpenCritic Ratings
+
+Ce dataset permet de croiser :
+
+- Le **score moyen agrégé** de la presse  
+- Une **classification qualitative OpenCritic** (ex. "Mighty", "Strong", etc.)  
+- Les **plateformes**, la **date de sortie** et l’**URL OpenCritic** de chaque jeu  
+
+Tous les variables sont au format texte, avec des dates sous la forme `"Month Day, Year"` (ex: `"January 1, 2023"`).
+
+Ce second dataset pourrait nous permettre de comparer les **avis des joueurs** (depuis `How Long To Beat`) avec ceux de la **presse spécialisée** (via `OpenCritic`) par exemple.
+
+### Steam Playtime & Engagement
+
+Ce jeu de données regroupe à la fois des métadonnées (comme le développeur, la date de sortie, le prix) et des mesures d’engagement des joueurs, notamment les **temps de jeu moyens**, les **notes positives ou négatives**, et les **nombres de succès**.
+
+Parmi les variables les plus utiles pour notre projet :
+
+- `average_playtime` : temps de jeu moyen en minutes (sur tous les joueurs).
+- `median_playtime` : temps de jeu médian.
+- `positive_ratings` / `negative_ratings` : nombre total d’évaluations positives et négatives laissées sur le jeu.
+- `owners` : fourchette estimée du nombre de propriétaires du jeu (ex. : "1,000,000-2,000,000").
+- `release_date` : date de sortie au format `YYYY-MM-DD`.
+- `price` : prix affiché du jeu au moment de l’extraction.
+- `categories`, `genres`, `steamspy_tags` : diverses classifications décrivant le gameplay et le contenu.
+- `platforms` : plateformes supportées (Windows, Mac, Linux).
+- `developer` / `publisher` : entités de développement et de publication.
+
+L’intérêt de ce dataset est de pouvoir **relier le temps de jeu réel observé sur Steam** avec les **temps de complétion déclarés** sur HowLongToBeat, et de confronter cela aux **notes utilisateur Steam** ou encore à la **popularité** mesurée par le nombre d’owners. Il offre également un aperçu de l’**engagement général des joueurs** indépendamment du style de complétion.
+
+## Plan d’analyse
+
+Avant toute chose, nous avons réfléchi aux questions que nous souhaitons poser à nos données, aux croisements de variables intéressants, et aux méthodes de visualisation potentielles.
+
+### Objectifs & interrogations
+
+- Quels sont les facteurs qui influencent le temps de complétion d’un jeu vidéo ?
+- Sur quelles parties les joueurs passent-ils le plus de temps (main story, extras, completionist) ?
+- Les temps de complétion varient-ils selon la plateforme ?
+- Combien de temps les joueurs passent-ils à jouer en moyenne ?
+- Y a-t-il une corrélation entre le temps de jeu et la note du jeu ? la date de sortie ? les genres ?
+- Quels sont les jeux les plus longs et les plus courts ? Appartiennent-ils à certains genres ?
+- Les modes multijoueurs (coopératif ou compétitif) influencent-ils la durée de jeu ?
+
+### Variables à comparer
+
+D'une façon générale nous voulons comparer les temps moyens de complétion :
+- Pour chaque mode de complétion (`Completionist`, `Speedrun`, `Multi-Player`...)
+- Par plateforme (si disponible)
+- Par genre(s) des jeux
+- Par année (ou mois) de publication
+- Par note (`Review_score`)
+- Par extrêmes des temps de jeu : valeurs minimales et maximales
+
+Nous pouvons aussi comparer le taux de complétion par rapport au prix du jeu pour voir si les joueurs sont plus investis en payant plus cher.
+Nous souhaitons aussi comparer les temps de jeu du dataset Steam avec le dataset HowLongToBeat pour vérifier si les joueurs jouent plus ou moins longtemps que ce qui est annoncé comme temps "complet".
+Enfin, nous voudrions comparer les avis des joueurs avec ceux de la presse spécialisée, depuis les datasets de How Long To Beat et de OpenCritics.
+
+### Méthodes envisagées
+
+Selon les variables analysées, nous envisageons d’utiliser :
+- Des **histogrammes** pour visualiser les distributions de temps
+- Des **boîtes à moustaches** (boxplots) pour comparer les genres ou années
+- Des **courbes temporelles** pour étudier l’évolution dans le temps
+- **D'autres visualisations adéquates** pour explorer les corrélations (temps vs note, par exemple)
+- Des **matrices de corrélation** pour visualiser les corrélations entre plusieurs variables quantitatives (playtime, ratings, score, price)
+- Des **Bargraph** pour visualiser la distribution des temps de jeu en fonction des genres/modes de jeu
 
 ---
 
@@ -343,11 +434,12 @@ steam_ratings_price_owners <- steam_ratings_price_owners %>%
 graphe <- ggplot(steam_ratings_price_owners,
                  aes(x = price,
                      y = ratings,
-                     color = owners)) +
+                     color = owners,
+                     alpha = owners)) +
   geom_point()
 
 # On inverse les couleurs du dégradé, onveut qu'un nombre plus élevé = une couleur plus sombre
-graphe <- graphe + scale_colour_gradient(low = "#56B1F7", high = "#132B43")
+graphe <- graphe + scale_colour_gradient(low = "lightblue", high = "darkblue")
 
 # On ajoute un titre et on change les labels
 graphe <- graphe + labs(colour = "Médiane du nombre\nestimé de possesseurs,\nen milliers",
@@ -415,8 +507,8 @@ ggplot(corr_long, aes(Var1, Var2, fill = Corr)) +
   geom_text(aes(label = sprintf("%.2f", Corr)), colour = "black", size = 3) +
   scale_fill_gradient2(
     low  = "#ff4500",
-    mid  = "#e0f3ff",   # bleu très pâle pour ~0
-    high = "#0074ff",
+    mid  = "lightblue",   # bleu très pâle pour ~0
+    high = "darkblue",
     limits = c(-1, 1),
     midpoint = 0,
     name = "r"
@@ -486,14 +578,15 @@ ggplot(top_games,
 
 On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
 
+---
 
-## Question : Les temps de complétion varient-ils selon la plateforme ?
+# Les temps de complétion varient-ils selon la plateforme ?
 
-### Hypothèse
+## Hypothèse
 
 Certains jeux pourraient être plus longs sur **Windows** que sur **Mac** ou **Linux**, en raison d’une **optimisation différente**, d’un **public distinct** ou d’un **catalogue partiel**. Nous faisons l’hypothèse que les jeux disponibles sur Windows sont en moyenne plus longs à jouer, car c’est la plateforme la plus courante, avec le catalogue le plus complet.
 
-### Graphique 1
+## Graphique 1
 
 ```{r plateform_des_jeux, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -541,13 +634,13 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
   theme_minimal()
 ```
 
-### Remarque
+## Remarque
 
 Le graphique est assez pertinent pour voir les **extremums**, mais complique la lecture pour les boîtes en elles-mêmes. En effet, le **temps de jeu moyen** pour la majorité des jeux est relativement faible (souvent au alentour de **20h**). Mais certains jeux (typiquement les **MMO ou jeux multijoueurs**) atteignent des temps de jeu particulièrement élevé (plusieurs **milliers d’heures**). De ce fait, l’échelle de l’**axe Y s’étire** énormément, rendant les boxplots écrasés vers le bas.
 
 Étant donné que ces extremum sont très semblables, j'ai décidé de refaire un graphique en adaptant l'axe Y (limité à 100h) pour plus de visibilité :
 
-### Graphique 1.2
+## Graphique 1.2
 
 ```{r plateform_des_jeux2, message=FALSE, warning=FALSE}
 ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
@@ -563,7 +656,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
   theme_minimal()
 ```
 
-### Interprétation des résultats 
+## Interprétation des résultats 
 
 Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les différences de temps de jeu moyen selon les plateformes supportées par les jeux Steam :
 
@@ -573,7 +666,7 @@ Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les di
 Ces variations peuvent s'expliquer de différentes manières. Cependant, la lisibilité de ce graphique me semblant encore assez complexe, j'ai décidé de l'adapter pour essayer d'y voir un peu plus clair d'abord, notamment en prenant une **échelle logarithmique**, et un autre type de graphique : le **Violon plot**.
 
 
-### Graphique 2
+## Graphique 2
 
 ```{r plateform_des_jeux3, message=FALSE, warning=FALSE}
 ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
@@ -584,7 +677,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
   theme_minimal()
 ```
 
-### Interprétation des résultats 
+## Interprétation des résultats 
 
 Sur cette forme de graphique, nous avons plusieurs choses :
 - En premier, **l'échelle** : c'est une échelle logarithmique, cela signifie qu’au lieu d’avoir un axe linéaire (1, 2, 3, ...), on a ici une échelle de puissance de 10 :
