@@ -196,7 +196,7 @@ ggplot(hltb_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
        x = "Genre principal",
        y = "Temps de jeu moyen (heures)",
        fill = "Mode de jeu") +
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5, size = 16),
         axis.text.x = element_text(angle = 45, hjust = 1))
@@ -258,17 +258,17 @@ ggplot(ratings_summary, aes(x = rating_bucket)) +
     aes(y = average_playtime, label = round(average_playtime, 1)),
     vjust = -0.5,
     size = 4,
-    color = "#ff8b00",
+    color = "#ff4500",
     fontface = "bold"
   ) +
   geom_text(
     aes(y = median_playtime, label = round(median_playtime, 1)),
     vjust = -0.5,
     size = 4,
-    color = "#9fcaff",
+    color = "lightblue",
     fontface = "bold"
   ) +
-  scale_fill_manual(values = c("Moyenne" = "#0074ff", "Médiane" = "#ff8b00"),
+  scale_fill_manual(values = c("Moyenne" = "darkblue", "Médiane" = "#ff4500"),
                     name = "") +
   labs(
     title = "Comparaison du temps de jeu moyen et médian par tranche d'avis positifs",
@@ -327,8 +327,8 @@ genre_summary <- steam_premier_genre %>%
   arrange(desc(mean_playtime))
 
 # Afficher le graphique
-ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime, fill = genre_main)) +
-  geom_col(show.legend = FALSE) +
+ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime)) +
+  geom_col(show.legend = FALSE, fill = "darkblue") +
   coord_flip() +
   labs(
     title = "Temps moyen de jeu par genre",
@@ -373,6 +373,7 @@ ggplot(top_jeux_simple, aes(x = reorder(name, average_playtime_hours), y = avera
     y = "Temps moyen de jeu (en heures)",
     fill = "Genre principal"
   ) +
+  scale_fill_manual(values = c("#cca505", "#d16505", "#ff4500", "#e79abd", "darkblue", "lightblue", "#00ddb0")) +
   theme_minimal() +
   theme(legend.position = "bottom", legend.text = element_text(size = 8))
 ```
@@ -478,6 +479,10 @@ Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus 
 
 Nous avons ensuite réalisé une heatmap des corrélations multivariées, qui permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
 
+## Remarque
+
+Nous avons supprimé les lignes où il y avait trop de possesseurs ou un prix trop élévé pour éviter que quelques outliers ne rendent le graphique illisible car trop petit. Nous avons aussi supprimé les lignes où il y avait trop peu d'avis car elles auraient pu fausser les données.
+
 ## Deuxième graphique
 
 ```{r prix_note_possesseurs_heatmap, message=FALSE, warning=FALSE}
@@ -507,7 +512,7 @@ ggplot(corr_long, aes(Var1, Var2, fill = Corr)) +
   geom_text(aes(label = sprintf("%.2f", Corr)), colour = "black", size = 3) +
   scale_fill_gradient2(
     low  = "#ff4500",
-    mid  = "lightblue",   # bleu très pâle pour ~0
+    mid  = "#e79abd",   # pour ~0
     high = "darkblue",
     limits = c(-1, 1),
     midpoint = 0,
@@ -631,6 +636,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
     y = "Temps moyen (heures)",
     fill = "Plateforme"
   ) +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
   theme_minimal()
 ```
 
@@ -653,6 +659,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
     y = "Temps moyen (heures)",
     fill = "Plateforme"
   ) +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
   theme_minimal()
 ```
 
@@ -674,6 +681,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
   scale_y_log10() +
   labs(title = "Distribution des temps de jeu moyens par plateforme (violin plot)",
        y = "Temps de jeu (heures, log)", x = "Plateforme") +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
   theme_minimal()
 ```
 
