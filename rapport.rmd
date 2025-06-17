@@ -711,4 +711,7 @@ Maintenant, revenons à nos **résultats** :
     - **Windows** a une base légèrement plus étalée vers le bas, ce qui suggère qu’il y a un peu plus de jeux avec très peu de temps de jeu moyen.
     - **Linux** et **Mac** semblent un peu plus concentrés autour d’un cœur de distribution (≈ 5-10h).
 
-(EN COURS)
+En conclusion sur ce graphique :
+- Il ne montre **pas un écart majeur** entre les plateformes ;
+- J'ai supposé que Windows puisse avoir **plus de jeux disponibles** sur sa plateforme, c'est pourquoi j'ai produit ce bar chart :
+
