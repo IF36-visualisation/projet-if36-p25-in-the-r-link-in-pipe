@@ -437,16 +437,19 @@ graphe <- ggplot(steam_ratings_price_owners,
                      y = ratings,
                      color = owners,
                      alpha = owners)) +
+  geom_point() +
+  geom_point() +
   geom_point()
 
 # On inverse les couleurs du dégradé, onveut qu'un nombre plus élevé = une couleur plus sombre
-graphe <- graphe + scale_colour_gradient(low = "lightblue", high = "darkblue")
+graphe <- graphe + scale_colour_gradient(low = "lightblue", high = "darkblue") + theme_minimal()
 
 # On ajoute un titre et on change les labels
-graphe <- graphe + labs(colour = "Médiane du nombre\nestimé de possesseurs,\nen milliers",
+graphe <- graphe + labs(colour = "Médiane du nombre\nestimé de possesseurs\n(milliers)",
                         y = "Pourcentage de votes positifs",
                         x = "Prix en dollars américains",
-                        title = "Estimation du nombre de possesseurs d'un jeu\nen fonction du prix et du nombre de votes positifs")
+                        title = "Estimation du nombre de possesseurs d'un jeu\nen fonction du prix et du nombre de votes positifs") +
+          guides(alpha = FALSE)
 
 # On affiche le graphique
 graphe
