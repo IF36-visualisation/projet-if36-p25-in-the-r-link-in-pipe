@@ -753,3 +753,25 @@ L’analyse des temps de complétion par plateforme, à travers ces visualisatio
 - Toutefois, **Windows** présente une distribution **plus étalée**, avec davantage de temps de jeux, ce qui s’explique par son **catalogue beaucoup plus vaste** ;
 
 En conclusion, les différences de temps de jeu moyen entre plateformes ne semblent pas liées à des caractéristiques intrinsèques des systèmes, mais plutôt à la taille et la diversité du catalogue disponible sur chaque plateforme.
+
+
+# Conclusion générale
+
+Notre exploration multidimensionnelle du temps de jeu des jeux vidéo nous a permis de valider plusieurs hypothèses, mais aussi d’en nuancer d’autres. En combinant des sources complémentaires (HowLongToBeat, OpenCritic, Steam), nous avons pu croiser données techniques, critiques/notations et comportements réels des joueurs.
+
+Voici les grandes lignes dégagées de notre analyse :
+
+- Le **genre du jeu est un facteur déterminant** de la durée de complétion. Les jeux de rôle et de course sont structurellement plus longs, surtout en mode "completionist", tandis que les shooters ou plateformers sont en moyenne plus courts.
+
+- La **relation entre avis positifs et temps de jeu est complexe** : si les jeux très bien notés sont un peu plus joués en moyenne, ce n’est pas un lien systématique. Le temps médian est assez peu affecté par la note, ce qui suggère que les joueurs ne s’appuient pas uniquement sur les évaluations pour décider de leur engagement.
+
+- L’étude du **genre et de la popularité** croisée aux temps de jeu montre que certains genres comme le "Massively Multiplayer" ou le "Free to Play" génèrent de très longues durées moyennes.
+
+- Le **prix** n’est pas directement lié à la durée de jeu, mais il influence la popularité. Les jeux peu chers et bien notés sont les plus achetés. Un jeu plus cher tend à être mieux noté, mais pas nécessairement plus joué.
+
+- Concernant **les plateformes, les différences de temps de complétion** ne semblent pas dues à des comportements différents, mais plutôt à la **taille du catalogue**. 
+
+- Enfin, bien que certains jeux très possédés soient très joués (ex. PUBG), beaucoup de **titres achetés en promotion ne sont presque jamais lancés**. Cela illustre un phénomène de consommation impulsive renforcé par les soldes Steam.
+
+En conclusion, le temps passé sur un jeu est influencé par des **facteurs** à la fois **structurels** (genre, modèle économique, plateforme) et **comportementaux** (lecture d’avis, objectifs personnels, préférences, achats impulsifs). Bien sur, il est important de **nuancer** un peu cette analyse puisque nos datasets ne sont pas les plus récent (respectivement 2023, Fev 2023 et 2019). Les tendances actuelles peuvent donc différer des observations issues de ces données. Enfin, on peut estimer qu'il y a un **biais de sélection** dans nos données car les jeux présents dans les datasets ne représentent pas nécessairement l’ensemble des jeux joués : par exemple le dataset **OpenCritic** reflète surtout les titres couverts par la presse spécialisée, donc plutôt des jeux "visibles", souvent moyens ou gros budgets.
+Ces éléments invitent à interpréter les résultats avec prudence, et soulignent la nécessité de croiser nos sources et d’actualiser régulièrement les données pour refléter au mieux les pratiques des joueurs et l’évolution de l’industrie du jeu vidéo.
