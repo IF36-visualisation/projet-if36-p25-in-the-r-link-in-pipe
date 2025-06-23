@@ -775,3 +775,25 @@ Voici les grandes lignes dégagées de notre analyse :
 
 En conclusion, le temps passé sur un jeu est influencé par des **facteurs** à la fois **structurels** (genre, modèle économique, plateforme) et **comportementaux** (lecture d’avis, objectifs personnels, préférences, achats impulsifs). Bien sur, il est important de **nuancer** un peu cette analyse puisque nos datasets ne sont pas les plus récent (respectivement 2023, Fev 2023 et 2019). Les tendances actuelles peuvent donc différer des observations issues de ces données. Enfin, on peut estimer qu'il y a un **biais de sélection** dans nos données car les jeux présents dans les datasets ne représentent pas nécessairement l’ensemble des jeux joués : par exemple le dataset **OpenCritic** reflète surtout les titres couverts par la presse spécialisée, donc plutôt des jeux "visibles", souvent moyens ou gros budgets.
 Ces éléments invitent à interpréter les résultats avec prudence, et soulignent la nécessité de croiser nos sources et d’actualiser régulièrement les données pour refléter au mieux les pratiques des joueurs et l’évolution de l’industrie du jeu vidéo.
+
+
+
+# Annexe
+
+## Répartition générale du projet 
+
+**Recherche des Datasets** : Tous
+**Rédaction du README** : Lucile - Tifenn
+**Rédaction du Rapport final** : Lucile - Tifenn
+**PowerPoint** : Lucile
+**Shiny** : Virgile
+**Tableau** : Ilan
+
+## Répartition des questions
+
+"Le genre d’un jeu influence-t-il sa durée de complétion ?" - Virgile
+"Il y a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?" - Lucile - Virgile
+"Il y a t il une corrélation entre le temps de jeu et son genre ?" - Tifenn
+"Les temps de complétion varient-ils selon la plateforme ?" - Tifenn 
+"Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?" - Ilan
+"Y a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?" - Ilan
