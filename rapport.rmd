@@ -216,7 +216,7 @@ Cela semble logique car les joueurs de shooters s'interessent plus à des modes 
 - 
 Ces résultats confirment que le genre du jeu est un bon prédicteur de sa durée. Il serait intéressant d’approfondir cette analyse en croisant la durée avec d’autres variables comme le prix pour voir par exemple si des jeux plus chèrs sont plus complets et par conséquent, plus long à terminer.
 
-## Complément d'analyse shiny 
+## Complément d'analyse Shiny 
 
 Nous avons réalisé des graphiques détaillés grâce à Shiny, en montrant les résultat mode par mode pour avoir plus de genres de jeux
 
@@ -420,6 +420,8 @@ Nous pouvons formuler l’hypothèse suivante : si le genre "Massively Multiplay
 
 ## Remarque
 
+Une version dynamique de ce dernier graphique est disponible sur notre **application Shiny**, pour voir plus de jeux. 
+
 Il est important de préciser que ce dataset date de **2019**.
 Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
 
@@ -512,6 +514,8 @@ Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus 
 Nous avons ensuite réalisé une heatmap des corrélations multivariées, qui permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
 
 ## Remarque
+
+Une version dynamique de ce graphique est disponible sur notre **application Shiny**, pour pouvoir modifier l'intervalle de prix visualisé. 
 
 Nous avons supprimé les lignes où il y avait trop de possesseurs ou un prix trop élévé pour éviter que quelques outliers ne rendent le graphique illisible car trop petit. Nous avons aussi supprimé les lignes où il y avait trop peu d'avis car elles auraient pu fausser les données.
 
@@ -614,6 +618,10 @@ ggplot(top_games,
 ## Interprétation
 
 On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
+
+## Remarque
+
+Une version de ce treemap est disponible sur notre **application Shiny**.
 
 ---
 
