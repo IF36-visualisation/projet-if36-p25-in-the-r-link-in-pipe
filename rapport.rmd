@@ -216,10 +216,9 @@ Cela semble logique car les joueurs de shooters s'interessent plus à des modes 
 - 
 Ces résultats confirment que le genre du jeu est un bon prédicteur de sa durée. Il serait intéressant d’approfondir cette analyse en croisant la durée avec d’autres variables comme le prix pour voir par exemple si des jeux plus chèrs sont plus complets et par conséquent, plus long à terminer.
 
-##Complément d'analyse shiny : 
+## Complément d'analyse shiny 
 
-### 1. Insertion des graphiques détaillés, mode par mode pour avoir plus de mode de jeux
-
+Nous avons réalisé des graphiques détaillés grâce à Shiny, en montrant les résultat mode par mode pour avoir plus de genres de jeux
 
 
 ```{r shiny-screenshots, echo=FALSE, out.width='85%', fig.align='center'}
@@ -230,28 +229,21 @@ knitr::include_graphics(c(
 ))
 ```
 
-### Interprétation des résultats
+## Interprétation
 
 L’application propose un filtre “Mode de jeu” (extras, completionist, main_story) et affiche, pour chaque mode, un histogramme horizontal des temps moyens de jeu par genre :
 
-Mode “extras”
+Mode `extras`
+- **Top 3 genres** : Massively Multiplayer, Incremental, Tactical Wargame
+- **Interprétation** : les joueurs qui cherchent des « extras » passent le plus de temps sur des jeux en ligne massifs et des jeux à progression lente (incremental).
 
-Top 3 genres : Massively Multiplayer, Incremental, Tactical Wargame
+Mode `completionist`
+- **Top 3 genres** : Massively Multiplayer, Console RPG, Incremental
+- **Interprétation** : ceux qui visent la complétion investissent beaucoup de temps dans les RPGs consoles (quêtes secondaires) et les jeux massivement multi.
 
-Interprétation : les joueurs qui cherchent des « extras » passent le plus de temps sur des jeux en ligne massifs et des jeux à progression lente (incremental).
-
-Mode “completionist”
-
-Top 3 genres : Massively Multiplayer, Console RPG, Incremental
-
-Interprétation : ceux qui visent la complétion investissent beaucoup de temps dans les RPGs consoles (quêtes secondaires) et les jeux massivement multi.
-
-Mode “main_story”
-
-Top 3 genres : Incremental, Massively Multiplayer, Simulation/Role-Playing
-
-Interprétation : pour terminer seulement la trame principale, les joueurs choisissent souvent des jeux « incremental » (campagnes longues) et restent dans des titres en ligne ou dans des simulations à forte rejouabilité.
-x
+Mode `main_story`
+- **Top 3 genres** : Incremental, Massively Multiplayer, Simulation/Role-Playing
+- **Interprétation** : pour terminer seulement la trame principale, les joueurs choisissent souvent des jeux « incremental » (campagnes longues) et restent dans des titres en ligne ou dans des simulations à forte rejouabilité.
 
 ---
 
@@ -725,7 +717,7 @@ ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform
   theme_minimal()
 ```
 
-## Interprétation des résultats 
+## Interprétation 
 
 Sur cette forme de graphique, nous avons plusieurs choses :
 - En premier, **l'échelle** : c'est une échelle logarithmique, cela signifie qu’au lieu d’avoir un axe linéaire (1, 2, 3, ...), on a ici une échelle de puissance de 10 :
@@ -753,7 +745,7 @@ En conclusion sur ce graphique :
 - J'ai supposé que Windows puisse avoir **plus de jeux disponibles** sur sa plateforme, c'est pourquoi j'ai produit ce bar chart :
 
 
-### Graphique 3
+## Graphique 3
 
 ```{r plateform_des_jeux4, message=FALSE, warning=FALSE}
 steam %>%
@@ -772,7 +764,7 @@ steam %>%
   theme_minimal()
 ```
 
-### Interprétation des résultats 
+## Interprétation  
 
 Ce graphique montre le nombre total de jeux disponibles sur Steam pour chaque plateforme. On observe que :
 - **Windows** domine très largement avec plus de **6000** jeux disponibles.
@@ -782,17 +774,14 @@ Ce graphique montre le nombre total de jeux disponibles sur Steam pour chaque pl
 Cette différence quantitative permet d’expliquer **pourquoi** la distribution des temps de jeu sur Windows était plus étalée dans le violin plot :
 ==> Plus il y a de jeux disponibles, plus la distribution s’élargit mécaniquement
 
-
-### Conclusion des résultats 
-
-L’analyse des temps de complétion par plateforme, à travers ces visualisations complémentaires, nous permet de dire :
+Pour conclure sur ce graphique, l’analyse des temps de complétion par plateforme, à travers ces visualisations complémentaires, nous permet de dire :
 - Les **distributions de temps de jeu sont globalement similaires** entre Windows, Mac et Linux ;
 - Toutefois, **Windows** présente une distribution **plus étalée**, avec davantage de temps de jeux, ce qui s’explique par son **catalogue beaucoup plus vaste** ;
 
 En conclusion, les différences de temps de jeu moyen entre plateformes ne semblent pas liées à des caractéristiques intrinsèques des systèmes, mais plutôt à la taille et la diversité du catalogue disponible sur chaque plateforme.
 
 
-# Conclusion générale
+## Conclusion générale
 
 Notre exploration multidimensionnelle du temps de jeu des jeux vidéo nous a permis de valider plusieurs hypothèses, mais aussi d’en nuancer d’autres. En combinant des sources complémentaires (HowLongToBeat, OpenCritic, Steam), nous avons pu croiser données techniques, critiques/notations et comportements réels des joueurs.
 
@@ -934,11 +923,13 @@ graphe_plus_proches <- ggplot(top_plus_proches, aes(x = titre)) +
   scale_shape_manual(values = c(1, 16)) +
   scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
 
+# Affichage
+graphe_top10_presse
+graphe_top10_joueurs
+graphe_min10_presse
+graphe_min10_joueurs
+graphe_plus_proches
 
-graphe_final_avis <- grid.arrange(graphe_top10_presse, graphe_top10_joueurs,
-                                  graphe_min10_presse, graphe_min10_joueurs,
-                                  graphe_plus_proches,
-                                  nrow = 3)
 ```
 
 ## Interprétation
