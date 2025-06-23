@@ -216,6 +216,43 @@ Cela semble logique car les joueurs de shooters s'interessent plus à des modes 
 - 
 Ces résultats confirment que le genre du jeu est un bon prédicteur de sa durée. Il serait intéressant d’approfondir cette analyse en croisant la durée avec d’autres variables comme le prix pour voir par exemple si des jeux plus chèrs sont plus complets et par conséquent, plus long à terminer.
 
+##Complément d'analyse shiny : 
+
+### 1. Insertion des graphiques détaillés, mode par mode pour avoir plus de mode de jeux
+
+
+
+```{r shiny-screenshots, echo=FALSE, out.width='85%', fig.align='center'}
+knitr::include_graphics(c(
+  "https://raw.githubusercontent.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/master/shiny/capture_shiny_rapport_2.png",
+  "https://raw.githubusercontent.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/master/shiny/capture_shiny_rapport.png",
+  "https://raw.githubusercontent.com/IF36-visualisation/projet-if36-p25-in-the-r-link-in-pipe/master/shiny/capture_shiny_rapport_3.png"
+))
+```
+
+### Interprétation des résultats
+
+L’application propose un filtre “Mode de jeu” (extras, completionist, main_story) et affiche, pour chaque mode, un histogramme horizontal des temps moyens de jeu par genre :
+
+Mode “extras”
+
+Top 3 genres : Massively Multiplayer, Incremental, Tactical Wargame
+
+Interprétation : les joueurs qui cherchent des « extras » passent le plus de temps sur des jeux en ligne massifs et des jeux à progression lente (incremental).
+
+Mode “completionist”
+
+Top 3 genres : Massively Multiplayer, Console RPG, Incremental
+
+Interprétation : ceux qui visent la complétion investissent beaucoup de temps dans les RPGs consoles (quêtes secondaires) et les jeux massivement multi.
+
+Mode “main_story”
+
+Top 3 genres : Incremental, Massively Multiplayer, Simulation/Role-Playing
+
+Interprétation : pour terminer seulement la trame principale, les joueurs choisissent souvent des jeux « incremental » (campagnes longues) et restent dans des titres en ligne ou dans des simulations à forte rejouabilité.
+x
+
 ---
 
 # Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
