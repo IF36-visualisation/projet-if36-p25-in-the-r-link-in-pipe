@@ -814,6 +814,183 @@ En conclusion, le temps passé sur un jeu est influencé par des **facteurs** à
 Ces éléments invitent à interpréter les résultats avec prudence, et soulignent la nécessité de croiser nos sources et d’actualiser régulièrement les données pour refléter au mieux les pratiques des joueurs et l’évolution de l’industrie du jeu vidéo.
 
 
+---
+
+
+# Les avis des joueurs sur les jeux sont-ils différents de ceux de la presse spécialisée ?
+
+## Hypothèse
+
+Nous avons voulu déterminer si l'**avis des joueurs** sur un jeu et celui de la **presse spécialisée** étaient différents.
+Pour cela, nous verrons une comparaison des avis sur les **10 jeux les mieux notés par les joueurs** et les **10 jeux les mieux notés par la presse**.
+Nous allons aussi voir les jeux pour lesquels **la presse et les joueurs ont donné le même avis**, en comparant les jeux avec les **meilleures et les pires notes**. 
+Nous pensons que les deux avis seront très différents mais nous ne savons pas exactement comment. Nous pensons que des jeux très connus vont avoir de **bonnes notes** de la part des deux, et que des jeux peu connus risquent d'avoir **deux notes avec plus de différence**.
+
+## Graphiques 
+
+```{r note_presse_joueurs, message=FALSE, warning=FALSE}
+# Fusionner les données selon le nom du jeu
+scores_jeux <- hltb %>%
+  select(Name, Review_score) %>%
+  merge((opencritic %>%
+           select(title, score)), by.x="Name", by.y = "title") %>%
+  rename("titre" = "Name", "score_presse" = "score", "score_joueurs" = "Review_score") %>%
+  na.omit()
+
+# On supprime les lignes où les avis des joueurs sont à 0 ou à 100, 
+# parce que ça pourrait signifier. qu'il y a eu peu ou pas d'avis donnés
+scores_jeux <- scores_jeux %>%
+  filter(score_joueurs < 100, score_joueurs > 0)
+
+# Calculer la différence entre les avis
+scores_jeux <- scores_jeux %>%
+  mutate(difference = if_else(score_presse > score_joueurs, 
+                              score_presse - score_joueurs, 
+                              score_joueurs - score_presse))
+
+# Récupérer les tops 10
+top_10_presse <- scores_jeux %>%
+  arrange(desc(score_presse)) %>%
+  slice_head(n = 10)
+
+top_10_joueurs <- scores_jeux %>%
+  arrange(desc(score_joueurs)) %>%
+  slice_head(n = 10)
+
+min_10_presse <- scores_jeux %>%
+  arrange(score_presse) %>%
+  slice_head(n = 10)
+
+min_10_joueurs <- scores_jeux %>%
+  arrange(score_joueurs) %>%
+  slice_head(n = 10)
+
+top_10_moins_proches <- scores_jeux %>%
+  arrange(desc(difference)) %>%
+  slice_head(n = 10)
+
+top_plus_proches <- scores_jeux %>%
+  filter(difference == 0) %>%
+  filter(score_joueurs > 87 | score_joueurs < 50)
+
+# Graphique 1 - Top 10 de la presse
+graphe_top10_presse <- ggplot(top_10_presse, aes(x = titre)) +
+  geom_point(shape = 1, aes(y = score_presse, color = "#ff4500")) +
+  geom_point(shape = 16, aes(y = score_joueurs, color = "darkblue")) +
+  scale_shape_identity() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Jeu", y = "Note sur 100", color = "Avis",
+       title = "Scores des jeux préférés de la presse") +
+  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
+
+# Graphique 2 - Top 10 des joueurs
+graphe_top10_joueurs <- ggplot(top_10_joueurs, aes(x = titre)) +
+  geom_point(shape = 1, aes(y = score_presse, color = "#ff4500")) +
+  geom_point(shape = 16, aes(y = score_joueurs, color = "darkblue")) +
+  scale_shape_identity() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Jeu", y = "Note sur 100", color = "Avis",
+       title = "Scores des jeux préférés des joueurs") +
+  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
+
+# Graphique 3 - Top 10 des jeux les moins aimés par la presse
+graphe_min10_presse <- ggplot(min_10_presse, aes(x = titre)) +
+  geom_point(shape = 1, aes(y = score_presse, color = "#ff4500")) +
+  geom_point(shape = 16, aes(y = score_joueurs, color = "darkblue")) +
+  scale_shape_identity() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Jeu", y = "Note sur 100", color = "Avis",
+       title = "Scores des jeux les moins aimés par la presse") +
+  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
+
+# Graphique 4 - Top 10 des jeux les moins aimés par les joueurs
+graphe_min10_joueurs <- ggplot(min_10_joueurs, aes(x = titre)) +
+  geom_point(shape = 1, aes(y = score_presse, color = "#ff4500")) +
+  geom_point(shape = 16, aes(y = score_joueurs, color = "darkblue")) +
+  scale_shape_identity() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Jeu", y = "Note sur 100", color = "Avis",
+       title = "Scores des jeux les moins aimés par les  joueurs") +
+  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
+
+
+# Graphique 5 - Les notes les plus proches
+graphe_plus_proches <- ggplot(top_plus_proches, aes(x = titre)) +
+  geom_point(shape = 1, aes(y = score_presse, color = "#ff4500")) +
+  geom_point(shape = 16, aes(y = score_joueurs, color = "darkblue")) +
+  scale_shape_identity() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Jeu", y = "Note sur 100", color = "Avis",
+       title = "Scores les plus élevés et les plus faibles\noù la presse et les joueurs ont le même avis") +
+  scale_shape_manual(values = c(1, 16)) +
+  scale_color_manual(values = c("#ff4500", "darkblue"), labels = c("Presse", "Joueurs"))
+
+
+graphe_final_avis <- grid.arrange(graphe_top10_presse, graphe_top10_joueurs,
+                                  graphe_min10_presse, graphe_min10_joueurs,
+                                  graphe_plus_proches,
+                                  nrow = 3)
+```
+
+## Interprétation
+
+Les graphiques obtenus montrent que :
+
+- Les **deux jeux présents dans le top 10 de la presse et des joueurs** sont "The Legend of Zelda : Breath of the Wild" et "Persona 5 Royal".
+- Pour les jeux préférés des joueurs, l'avis de la presse est souvent très proche de l'avis des joueurs (moins de 5 points d'écart) pour les jeux populaires, mais inférieur de 15 à 30 points pour les jeux moins connus.
+- Les jeux préférés de la presse sont uniquement des **jeux très populaires**. Ils ont aussi des avis très élevés (90 ou plus) de la part des joueurs.
+- God of War
+- Les jeux avec le plus d'écart entre l'avis des joueurs et celui de la presse ont tous un avis très bas des joueurs, soit 10 soit 20, alors que l'avis de la presse est au-dessus de 60.
+
+Dans le cas du 5ème diagramme, sur les notes les plus différentes, il est important de noter que 
+
+Dans le **premier graphique**, sur les jeux préférés de la presse,  nous pouvons remarquer plusieurs choses. Tout d'abord, les scores donnés par la presse et les joueurs sont **très proches**, de 1 à 7 points d'écarts. Le score de la presse est presque toujours plus élevé que celui des joueurs, ce qui est logique étant donné que nous avons pris les jeux avec les plus hauts scores de la presse. Tous les jeux de cette liste sont connus et aimés du grand public, donc ce n'est pas surprenant qu'ils aient tous des scores au-dessus de 90.
+Par ailleurs, le jeu *God of War* est un **outlier**, il a deux scores de la part des joueurs. En consultant le site How Long To Beat, nous pouvons déduire que cela est dû au fait que le site comporte deux jeux appelés *God of War*, *God of War (2005)* et *God of War (2018)*.
+
+On remarque la même tendance dans le **deuxième graphique** sur les jeux préférés des joueurs. Les **jeux connus ont des scores très proches** et au-dessus de 90 sur 100. On peut même remarquer que les jeux *The Legend of Zelda: Breath of the Wild* et *Persona 5 Royal* sont présents dans les deux graphes et pourraient donc être considérés comme les deux meilleurs jeux, ou du moins les deux jeux les plus appréciés.
+Cependant, les jeux moins connus du grand public ont des **scores plus bas de la part de la presse**. On peut supposer que la raison est que l'avis moins positif de la presse donne moins envie aux joueurs de les acheter, et que ceux qui les achètent avent déjà qu'ils seront intéressés. 
+En regardant les avis de *The Vale: Shadow of the Crown* et *APICO* sur Steam et sur OpenCritic, on ne remarque pas de défaut évident. Pour *Mutropolis*, la presse raporte des problèmes sur le rythme du jeu, avec des moments trop lents. 
+Pour *Save me Mr Tako*, le jeu le moins bien noté par la presse, certaines critiques dércivent le jeu comme trop dur, pas assez original, et "ne faisant que le strict minimum". Ce jeu sorti en 2018 est une immitation des jeux de la GameBoy, notamment au niveau graphique. Il joue sur la nsotalgie des joueurs, ce qui peut peut-être expliquer le score très haut de leur part. 
+
+Dans le **troisième graphique** sur les jeux les moins aimés par la presse, on remarque une plus grande disparité dans les avis des joueurs comparés à ceux des joueurs. Pour comprendre les raisons de ces différences, nous avons là encore consulté les critiques données sur Steam et sur OpenCritic.
+Certains jeux sont **plutôt appréciés des joueurs** parce qu'ils sont très peu connus et n'ont donc pas beaucoup d'avis. C'est le cas de *Yasai Ninja* et *Grand Prix Rock 'N Racing*. Le faible nombre d'avis de la part des joueurs rend leur score peu représentatif et donc peu utile.
+Certains jeux sont **plutôt mal notés** par les joueurs parce qu'ils sont mal conçus. 
+Les deux jeux les plus mal notés, *Vroom in the Night Sky* et *Raven's Cry*, sont des jeux qui ne sont connus qu'à cause de leur mauvas développement. 
+*Rugby 15* est aussi un exemple d'un gros échec. *Joe's Diner* et *Hollow* sont des jeux peu connus et qui ont de nombreux problèmes de gameplay. 
+*Cartoon Network: Battle Crasher* est décrit comme "générique" et "insipide" par la presse. Ce jeu est basé sur des personnages de dessins animés célèbres et les problèmes du jeu sont probablement exacerbés par la déception liée aux grandes attentes d'un jeu sur une license connue. D'un autre côté, la note des joueurs est peut-être un peu plus élevée pour la même raison : même si le jeu est peu intéressant, les joueurs apprécient le fait de jouer avec leurs personnages favoris.
+*Soda Drinker Pro* est un cas à part, étant intentionnellement mal conçu. Cela explique le score bas de la presse, qui essait de présenter le jeu de manière objective, mais aussi le score plus élevé de la part des joueurs, qui prennent le jeu avec humour et apprécient son ironie.
+*Super Seducer* est un autre cas à part. La presse lui reproche d'être sexiste et d'objectifier les femmes, mais on peut supposer qu'une partie des joueurs l'ayant acheté étaient déjà consients de ces problèmes et ne l'auraient pas acheté si cela les dérangeait, ce qui explique le score plus élevé.  
+
+Dans le **quatrième graphique** sur les jeux les moins aimés par les joueurs, on remarque d'abord que tous les avis des joueurs sont à 10/100. Ce sont des jeux très peu connus, et le score indentique de 10 pile est probablement le résultat d'un seul avis. Les notes de la presse sont pour la plupart entre 60 et 80, ce qui explique aussi en partie le fait que ces jeux ne soient pas très connus. Si ils avaient été acclamés par la presse, ils auraient probablement été plus célèbres.
+
+Dans le **cinquième graphique**, sur les jeux pour lesquels la presse et les joueurs ont donnés exactement le même score, nous avons conservé les **5 jeux avec les scores les plus élevés** et les **5 jeux avec les scores les plus bas**. 
+Les jeux les **mieux notés** sont soit des jeux faisant partie de **licenses très connues et appréciées** (*Final Fantasy*, *Dark Souls*, *Out of the Park Baseball*), soit des jeux qui ont été **acclamés à leur sortie** et ont reçu de nombreuses récompenses.
+Les jeux les **moins bien notés** ont reçu trois types de critiques différentes : soit ils ne sont **pas assez intéressants**, soit ils sont **trop compliqués**, soit ils ont des **problèmes de maniabilté et de gameplay**. Ce sont des critiques semblables à celles que nous avions vues pour le **troisième graphe**.
+
+Nous avions envisagé d'aussi représenter les **scores les plus éloignés**, mais les résultats étaient presque identiques à ceux du quatrième graphique. 
+
+Pour conclure, les **jeux de licenses célèbres** ont souvent de **très bonnes critiques**, tandis que les **jeux peu connus** reçoivent des avis variables. Les **problèmes** qui donnent lieu à des notes basses, notamment de la part de la presse, sont souvent le **manque de maniabilité** et des **problèmes de gameplay**, le **manque d'originalité**, une **diffculté trop importante** et une **histoire pas assez intéressante**.
+
+## Remarque
+
+Nous avons **supprimé les lignes** où les avis des joueurs étaient **égaux à 0 ou à 100**, car cela pourrait signifier qu'il y a eu peu d'avis donnés. N'ayant pas de données sur le nombre d'avis, nous n'avons pas trouvé de meilleur moyen de filtrer les lignes. 
+
+Il est important de préciser que certains jeux peuvent avoir été **omis** dans cette représentation car ils n'étaient **pas orthographiés exactement de la même manière** dans les deux datasets que nous avons combinés pour réaliser ces diagrammes (*How Long To Beat* et *Open Critic*).
+
+Il faut aussi noter que l'**échelle horizontale** est **différente selon le graphique**.
+
+
+---
+
 
 # Annexe
 
