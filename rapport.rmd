@@ -791,6 +791,8 @@ Ces éléments invitent à interpréter les résultats avec prudence, et soulign
 
 ## Répartition des questions
 
+Chaque personne a réalisé les graphes et rédigé l’analyse pour les questions dont elle s’est occupée :
+
 "Le genre d’un jeu influence-t-il sa durée de complétion ?" - Virgile
 "Il y a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?" - Lucile - Virgile
 "Il y a t il une corrélation entre le temps de jeu et son genre ?" - Tifenn
