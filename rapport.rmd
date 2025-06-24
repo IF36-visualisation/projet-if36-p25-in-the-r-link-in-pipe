@@ -437,7 +437,7 @@ Ces éléments invitent à interpréter les résultats avec prudence, et soulign
 
 # Temps de jeu
 
-Nous nous sommes ensiite penchés sur le temps moyen passé surles joueurs sur chaque jeu.
+Nous nous sommes ensuite penchés sur le temps moyen passé par les joueurs sur chaque jeu.
 
 ## Il y a t il une corrélation entre le temps de jeu et son genre ?
 
@@ -751,6 +751,7 @@ Le graphique obtenu montre que :
 Cela **confirme partiellement** notre hypothèse : on voit que **moins un jeu est cher** et **plus il a un pourcentage élevé d'avis positifs**, **plus il aura de chances d'être possédé**. On voit aussi apparaître une **corrélation entre note et prix**. 
 
 Nous pouvons donc partir du principe que lorsqu'un jeu est peu cher, et surtout lorsqu'il est gratuit, les utilisateurs vont plus l'acheter. De plus, les utilisateurs auront plus tendance à acheter un jeu s'il est bien noté. Nous pouvons supposer que c'est dû aux faits suivants :
+
 - Les utilisateurs auront **plus confiance** en un jeu avec de **bons avis**. 
 - **Moins un jeu est cher**, moins il leur semble **risqué de l'acheter**, même s'il a de mauvais avis.
 - Les jeux **les mieux notés** sont **plus mis en avant** par la plateforme Steam. Un utilisateur a plus de chance d'entrer en contact avec des jeux bien notés, et donc de les acheter.
@@ -956,23 +957,28 @@ Dans le **premier graphique**, sur les jeux préférés de la presse,  nous pouv
 Par ailleurs, le jeu *God of War* est un **outlier**, il a deux scores de la part des joueurs. En consultant le site How Long To Beat, nous pouvons déduire que cela est dû au fait que le site comporte deux jeux appelés *God of War*, *God of War (2005)* et *God of War (2018)*.
 
 On remarque la même tendance dans le **deuxième graphique** sur les jeux préférés des joueurs. Les **jeux connus ont des scores très proches** et au-dessus de 90 sur 100. On peut même remarquer que les jeux *The Legend of Zelda: Breath of the Wild* et *Persona 5 Royal* sont présents dans les deux graphes et pourraient donc être considérés comme les deux meilleurs jeux, ou du moins les deux jeux les plus appréciés.
+
 Cependant, les jeux moins connus du grand public ont des **scores plus bas de la part de la presse**. On peut supposer que la raison est que l'avis moins positif de la presse donne moins envie aux joueurs de les acheter, et que ceux qui les achètent avent déjà qu'ils seront intéressés. 
 En regardant les avis de *The Vale: Shadow of the Crown* et *APICO* sur Steam et sur OpenCritic, on ne remarque pas de défaut évident. Pour *Mutropolis*, la presse raporte des problèmes sur le rythme du jeu, avec des moments trop lents. 
 Pour *Save me Mr Tako*, le jeu le moins bien noté par la presse, certaines critiques dércivent le jeu comme trop dur, pas assez original, et "ne faisant que le strict minimum". Ce jeu sorti en 2018 est une immitation des jeux de la GameBoy, notamment au niveau graphique. Il joue sur la nsotalgie des joueurs, ce qui peut peut-être expliquer le score très haut de leur part. 
 
-Dans le **troisième graphique** sur les jeux les moins aimés par la presse, on remarque une plus grande disparité dans les avis des joueurs comparés à ceux des joueurs. Pour comprendre les raisons de ces différences, nous avons là encore consulté les critiques données sur Steam et sur OpenCritic.
-Certains jeux sont **plutôt appréciés des joueurs** parce qu'ils sont très peu connus et n'ont donc pas beaucoup d'avis. C'est le cas de *Yasai Ninja* et *Grand Prix Rock 'N Racing*. Le faible nombre d'avis de la part des joueurs rend leur score peu représentatif et donc peu utile.
+Dans le **troisième graphique** sur les jeux les moins aimés par la presse, on remarque une plus grande disparité dans les avis des joueurs comparés à ceux des joueurs. Pour comprendre les raisons de ces différences, nous avons là encore consulté les critiques données sur Steam et sur OpenCritic. 
+
+Certains jeux sont **plutôt appréciés des joueurs** parce qu'ils sont très peu connus et n'ont donc pas beaucoup d'avis. C'est le cas de *Yasai Ninja* et *Grand Prix Rock 'N Racing*. Le faible nombre d'avis de la part des joueurs rend leur score peu représentatif et donc peu utile. 
+
 Certains jeux sont **plutôt mal notés** par les joueurs parce qu'ils sont mal conçus. 
 Les deux jeux les plus mal notés, *Vroom in the Night Sky* et *Raven's Cry*, sont des jeux qui ne sont connus qu'à cause de leur mauvas développement. 
 *Rugby 15* est aussi un exemple d'un gros échec. *Joe's Diner* et *Hollow* sont des jeux peu connus et qui ont de nombreux problèmes de gameplay. 
 *Cartoon Network: Battle Crasher* est décrit comme "générique" et "insipide" par la presse. Ce jeu est basé sur des personnages de dessins animés célèbres et les problèmes du jeu sont probablement exacerbés par la déception liée aux grandes attentes d'un jeu sur une license connue. D'un autre côté, la note des joueurs est peut-être un peu plus élevée pour la même raison : même si le jeu est peu intéressant, les joueurs apprécient le fait de jouer avec leurs personnages favoris.
-*Soda Drinker Pro* est un cas à part, étant intentionnellement mal conçu. Cela explique le score bas de la presse, qui essait de présenter le jeu de manière objective, mais aussi le score plus élevé de la part des joueurs, qui prennent le jeu avec humour et apprécient son ironie.
-*Super Seducer* est un autre cas à part. La presse lui reproche d'être sexiste et d'objectifier les femmes, mais on peut supposer qu'une partie des joueurs l'ayant acheté étaient déjà consients de ces problèmes et ne l'auraient pas acheté si cela les dérangeait, ce qui explique le score plus élevé.  
+
+*Soda Drinker Pro* est un cas à part, étant intentionnellement mal conçu. Cela explique le score bas de la presse, qui essait de présenter le jeu de manière objective, mais aussi le score plus élevé de la part des joueurs, qui prennent le jeu avec humour et apprécient son ironie. *Super Seducer* est un autre cas à part. La presse lui reproche d'être sexiste et d'objectifier les femmes, mais on peut supposer qu'une partie des joueurs l'ayant acheté étaient déjà consients de ces problèmes et ne l'auraient pas acheté si cela les dérangeait, ce qui explique le score plus élevé.  
 
 Dans le **quatrième graphique** sur les jeux les moins aimés par les joueurs, on remarque d'abord que tous les avis des joueurs sont à 10/100. Ce sont des jeux très peu connus, et le score indentique de 10 pile est probablement le résultat d'un seul avis. Les notes de la presse sont pour la plupart entre 60 et 80, ce qui explique aussi en partie le fait que ces jeux ne soient pas très connus. Si ils avaient été acclamés par la presse, ils auraient probablement été plus célèbres.
 
 Dans le **cinquième graphique**, sur les jeux pour lesquels la presse et les joueurs ont donnés exactement le même score, nous avons conservé les **5 jeux avec les scores les plus élevés** et les **5 jeux avec les scores les plus bas**. 
+
 Les jeux les **mieux notés** sont soit des jeux faisant partie de **licenses très connues et appréciées** (*Final Fantasy*, *Dark Souls*, *Out of the Park Baseball*), soit des jeux qui ont été **acclamés à leur sortie** et ont reçu de nombreuses récompenses.
+
 Les jeux les **moins bien notés** ont reçu trois types de critiques différentes : soit ils ne sont **pas assez intéressants**, soit ils sont **trop compliqués**, soit ils ont des **problèmes de maniabilté et de gameplay**. Ce sont des critiques semblables à celles que nous avions vues pour le **troisième graphe**.
 
 Nous avions envisagé d'aussi représenter les **scores les plus éloignés**, mais les résultats étaient presque identiques à ceux du quatrième graphique. 
@@ -989,16 +995,45 @@ Il faut aussi noter que l'**échelle horizontale** est **différente selon le gr
 
 ---
 
+# Conclusion
+
+## Ce que nous avons appris
+
+Nous avons pu voir que le genre d'un jeu influençait grandement sa durée de complétion, mais que ce n'était pas le cas de la plateforme sur lequel il est joué. Nous avons aussi remarqué qu'il y a beaucoup plus de jeux disponibles sur Windows que sur Mac ou Linux.
+
+Nous avons constaté que les genres de jeux multijoueurs et le jeux d'aventure ont souvent un temps de jeu important, et que les jeux les plus vendus ont souvent un temps de jeu moyen peu élevé. Nous avons aussi pu voir que les avis donnés par les joueurs sur Steam n'influençaient que très peu le temps passé par les joueurs sur le jeu.
+
+Enfin, nous avons pu remarquer que le nombre de possesseurs influençait le pourcentage d'avis positifs d'un jeu. Nous avons aussi pu noter que les jeux de grandes franchises ont souvent de très bonnes critiques, tandis que les jeux peu connus reçoivent des avis plus variables.
+
+## Difficultés rencontrées
+
+Lors de la rédaction de la proposition de projet, nous nous étions apperçus que le format json dans lequel était formaté le dataset How Long To Beat n'était pas très pratique. Cependant, nous ne nous attendions pas à avoir autant de difficulté à l'exploiter. Une fois que nous avons trouvé les bons outils pour transformer ce 
+
+Nous avons rencontré quelques difficultés entre nos différents ordinateurs. Certains ne comprenaient pas les caractères chinois dans certains titres, tandis que d'autres réagissaient mal à la fonction de filtre créée pour pallier à ce problème.
+
+Notre groupe n'a pas été extrêmement bien organisé, et nous avons dû réaliser certaines parties du travail au dernier moment. Si le projet était à refaire, nous nous y prendrions plus tôt, et nous communiquerions peut-être plus entre nous. Nous n'avons discuté que par messages pour la majorité du projet, et cela nous a peut-être porté préjudice.
+
+## Pistes d'approfondissement
+
+Il serait possible d'explorer l'influence d'autres variables sur le temps de jeu ou la durée de complétion.
+
+On pourrait aussi explorer plus en détail la différence entre les conséquences des avis de la presse et de ceux des joueurs.
+
+---
+
 # Annexe
 
 ## Répartition générale du projet 
 
-**Recherche des Datasets** : Tous
-**Rédaction du README** : Lucile - Tifenn
-**Rédaction du Rapport final** : Lucile - Tifenn
-**PowerPoint** : Lucile
-**Shiny** : Virgile
-**Tableau** : Ilan
+- **Recherche des Datasets** : Tous
+- **Rédaction du README** : Lucile - Tifenn
+- **Rédaction du Rapport final** : Lucile - Tifenn
+  - **Rédaction de la conclusion** : Lucile
+  - **Rédaction de l'annexe** : Tifenn
+  - **Réorganisation et harmonization du contenu** : Lucile
+- **PowerPoint** : Lucile
+- **Shiny** : Virgile
+- **Tableau** : Ilan
 
 ## Répartition des questions
 
