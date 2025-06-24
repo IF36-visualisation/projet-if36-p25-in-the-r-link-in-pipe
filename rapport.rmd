@@ -328,6 +328,10 @@ ggplot(ratings_summary, aes(x = rating_bucket)) +
 
 D'après le temps de jeu moyen, plus les avis sont positifs plus les jeux sont joués. Néanmoins, d'après le temps jeu médian, les avis, qu'ils soient très positifs ou très négatifs ou dans l'entre-deux, n'influencent pas le temps passé sur les jeux. Donc, très peu de joueurs se fient aux avis Steam ou ils préfèrent jouer quelques heures avant d'aller lire les avis. Les avis Steam ne sont peut-être pas aussi pertinents que ceux rédigés par la presse et les magazines spécialisés.
 
+## Remarque
+
+Une version dynamique de ce graphique est disponible sur notre **application Shiny**, pour voir les moyennes séparées en plus ou moins de tranches.
+
 ---
 
 # Il y a t il une corrélation entre le temps de jeu et son genre ?
