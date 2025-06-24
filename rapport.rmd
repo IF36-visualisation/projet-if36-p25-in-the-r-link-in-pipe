@@ -157,13 +157,17 @@ Selon les variables analysées, nous envisageons d’utiliser :
 
 ---
 
-# Le genre d’un jeu influence-t-il sa durée de complétion ?
+# Durée de complétion
 
-## Hypothèse
+Nous avons commencé par nous pencher sur le temps que prennent les joueurs à finir les jeux, c'est-à-dire notre questionnement principal au début du projet.
+
+## Le genre d’un jeu influence-t-il sa durée de complétion ?
+
+### Hypothèse
 
 Nous supposons que le genre d’un jeu vidéo influence fortement sa durée de complétion. Par exemple, les jeux de rôle ou d’aventure demanderaient plus d’heures pour être terminés, notamment en mode "completionist", tandis que les jeux de course ou de plateforme seraient plus courts.
 
-## Graphique
+### Graphique
 
 ```{r genre_duree_completion, message=FALSE, warning=FALSE}
 
@@ -202,9 +206,7 @@ ggplot(hltb_summary, aes(x = Primary_Genre, y = Temps_moyen, fill = Mode)) +
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
----
-
-## Interprétation
+### Interprétation
 
 Ce graphique permet de comparer le **temps de jeu moyen par genre** selon trois modes de complétion : `main_story`, `extras` et `completionist`.
 
@@ -216,7 +218,7 @@ Cela semble logique car les joueurs de shooters s'interessent plus à des modes 
 - 
 Ces résultats confirment que le genre du jeu est un bon prédicteur de sa durée. Il serait intéressant d’approfondir cette analyse en croisant la durée avec d’autres variables comme le prix pour voir par exemple si des jeux plus chèrs sont plus complets et par conséquent, plus long à terminer.
 
-## Complément d'analyse Shiny 
+### Complément d'analyse Shiny 
 
 Nous avons réalisé des graphiques détaillés grâce à Shiny, en montrant les résultat mode par mode pour avoir plus de genres de jeux
 
@@ -229,7 +231,7 @@ knitr::include_graphics(c(
 ))
 ```
 
-## Interprétation
+### Interprétation
 
 L’application propose un filtre “Mode de jeu” (extras, completionist, main_story) et affiche, pour chaque mode, un histogramme horizontal des temps moyens de jeu par genre :
 
@@ -247,14 +249,351 @@ Mode `main_story`
 
 ---
 
-# Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
+## Les temps de complétion varient-ils selon la plateforme ?
 
-## Hypothèse
+### Hypothèse
+
+Certains jeux pourraient être plus longs sur **Windows** que sur **Mac** ou **Linux**, en raison d’une **optimisation différente**, d’un **public distinct** ou d’un **catalogue partiel**. Nous faisons l’hypothèse que les jeux disponibles sur Windows sont en moyenne plus longs à jouer, car c’est la plateforme la plus courante, avec le catalogue le plus complet.
+
+### Premier graphique
+
+```{r plateform_des_jeux, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+
+# Nettoyage de base
+steam <- steam %>%
+  filter(average_playtime > 0) %>% # on garde les jeux joués
+  mutate(
+    average_playtime_hours = average_playtime / 60,
+    windows = str_detect(platforms, "windows"),
+    mac     = str_detect(platforms, "mac"),
+    linux   = str_detect(platforms, "linux")
+  )
+
+# Création du dataset long : une ligne par plateforme présente
+steam_long <- steam %>%
+  select(name, average_playtime_hours, windows, mac, linux) %>%
+  pivot_longer(cols = c(windows, mac, linux),
+               names_to = "platform",
+               values_to = "available") %>%
+  filter(available == TRUE)
+
+# Résumé par plateforme
+platform_summary <- steam_long %>%
+  group_by(platform) %>%
+  summarise(
+    n_jeux = n(),
+    moyenne_heures = mean(average_playtime_hours),
+    mediane_heures = median(average_playtime_hours)
+  )
+
+# Affichage du graphique
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  scale_y_continuous(trans = "sqrt") +
+  labs(
+    title = "Temps de jeu moyen par plateforme (jeux Steam)",
+    x = "Plateforme",
+    y = "Temps moyen (heures)",
+    fill = "Plateforme"
+  ) +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
+  theme_minimal()
+```
+
+### Remarque
+
+Le graphique est assez pertinent pour voir les **extremums**, mais complique la lecture pour les boîtes en elles-mêmes. En effet, le **temps de jeu moyen** pour la majorité des jeux est relativement faible (souvent au alentour de **20h**). Mais certains jeux (typiquement les **MMO ou jeux multijoueurs**) atteignent des temps de jeu particulièrement élevé (plusieurs **milliers d’heures**). De ce fait, l’échelle de l’**axe Y s’étire** énormément, rendant les boxplots écrasés vers le bas.
+
+Étant donné que ces extremum sont très semblables, j'ai décidé de refaire un graphique en adaptant l'axe Y (limité à 100h) pour plus de visibilité :
+
+### Premier graphique - Suite
+
+```{r plateform_des_jeux2, message=FALSE, warning=FALSE}
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  coord_cartesian(ylim = c(0, 100)) +
+  labs(
+    title = "Temps de jeu par plateforme (jeux Steam)",
+    subtitle = "Distribution des temps de jeu moyens (limités à 100h)",
+    x = "Plateforme",
+    y = "Temps moyen (heures)",
+    fill = "Plateforme"
+  ) +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
+  theme_minimal()
+```
+
+### Interprétation des résultats 
+
+Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les différences de temps de jeu moyen selon les plateformes supportées par les jeux Steam :
+
+- **Windows** semble être la plate-forme la plus courante, elle affiche la plus grande variabilité de temps de jeu ;
+- **Mac** montre des temps de jeu en moyenne plus élevés que Linux ;
+
+Ces variations peuvent s'expliquer de différentes manières. Cependant, la lisibilité de ce graphique me semblant encore assez complexe, j'ai décidé de l'adapter pour essayer d'y voir un peu plus clair d'abord, notamment en prenant une **échelle logarithmique**, et un autre type de graphique : le **Violin plot**.
+
+
+### Deuxième graphique
+
+```{r plateform_des_jeux3, message=FALSE, warning=FALSE}
+ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
+  geom_violin(trim = FALSE, alpha = 0.6) +
+  scale_y_log10() +
+  labs(title = "Distribution des temps de jeu moyens par plateforme (violin plot)",
+       y = "Temps de jeu (heures, log)", x = "Plateforme") +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
+  theme_minimal()
+```
+
+### Interprétation 
+
+Sur cette forme de graphique, nous avons plusieurs choses :
+- En premier, **l'échelle** : c'est une échelle logarithmique, cela signifie qu’au lieu d’avoir un axe linéaire (1, 2, 3, ...), on a ici une échelle de puissance de 10 :
+    - 1e-01 → 0,1 heure (≈ 6 minutes)
+    - 1e+00 → 1 heure
+    - 1e+01 → 10 heures
+    - 1e+02 → 100 heures
+    - 1e+03 → 1000 heures (= plus de 40 jours) 
+
+L'**avantage** de cette échelle est qu'elle **compresse visuellement les valeurs extrêmes** et **rend plus lisibles les tendances générales**, même en présence de très gros outliers.
+
+- En deuxième, la **largeur** du violon : elle indique à chaque hauteur la **densité de jeux** à ce niveau de durée. Ainsi : 
+    - Si le violon est large vers 1e+01, cela signifie que de nombreux jeux ont une durée moyenne autour de 10h.
+    - Si le violon est étroit à un endroit, il y a peu de jeux avec ce temps de jeu moyen.
+    
+Maintenant, revenons à nos **résultats** :
+- Sur les **3 plateformes**, la majorité des jeux ont un **temps moyen compris entre 1h et 10h** (zone la plus large, centrée vers 1e+00 à 1e+01).
+- **Quelques jeux dépassent** les 100h voire 1000h, mais ils sont très rares : c’est la partie très fine et étirée du haut du violon.
+- Les **distributions sont globalement similaires** entre les 3 plateformes :
+    - **Windows** a une base légèrement plus étalée vers le bas, ce qui suggère qu’il y a un peu plus de jeux avec très peu de temps de jeu moyen.
+    - **Linux** et **Mac** semblent un peu plus concentrés autour d’un cœur de distribution (≈ 5-10h).
+
+En conclusion sur ce graphique :
+- Il ne montre **pas un écart majeur** entre les plateformes ;
+- J'ai supposé que Windows puisse avoir **plus de jeux disponibles** sur sa plateforme, c'est pourquoi j'ai produit ce bar chart :
+
+
+### Troisième graphique
+
+```{r plateform_des_jeux4, message=FALSE, warning=FALSE}
+steam %>%
+  summarise(
+    Windows = sum(windows, na.rm = TRUE),
+    Mac = sum(mac, na.rm = TRUE),
+    Linux = sum(linux, na.rm = TRUE)
+  ) %>%
+  pivot_longer(everything(), names_to = "platform", values_to = "n") %>%
+  ggplot(aes(x = platform, y = n, fill = platform)) +
+  geom_col() +
+  labs(title = "Nombre de jeux disponibles par plateforme",
+       x = "Plateforme",
+       y = "Nombre de jeux") +
+  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
+  theme_minimal()
+```
+
+### Interprétation  
+
+Ce graphique montre le nombre total de jeux disponibles sur Steam pour chaque plateforme. On observe que :
+- **Windows** domine très largement avec plus de **6000** jeux disponibles.
+- **Mac** suit avec environ **2500** jeux.
+- **Linux** ferme la marche avec environ **1700** jeux.
+
+Cette différence quantitative permet d’expliquer **pourquoi** la distribution des temps de jeu sur Windows était plus étalée dans le violin plot :
+==> Plus il y a de jeux disponibles, plus la distribution s’élargit mécaniquement
+
+Pour conclure sur ce graphique, l’analyse des temps de complétion par plateforme, à travers ces visualisations complémentaires, nous permet de dire :
+- Les **distributions de temps de jeu sont globalement similaires** entre Windows, Mac et Linux ;
+- Toutefois, **Windows** présente une distribution **plus étalée**, avec davantage de temps de jeux, ce qui s’explique par son **catalogue beaucoup plus vaste** ;
+
+En conclusion, les différences de temps de jeu moyen entre plateformes ne semblent pas liées à des caractéristiques intrinsèques des systèmes, mais plutôt à la taille et la diversité du catalogue disponible sur chaque plateforme.
+
+### Conclusion générale
+
+Notre exploration multidimensionnelle du temps de jeu des jeux vidéo nous a permis de valider plusieurs hypothèses, mais aussi d’en nuancer d’autres. En combinant des sources complémentaires (HowLongToBeat, OpenCritic, Steam), nous avons pu croiser données techniques, critiques/notations et comportements réels des joueurs.
+
+Voici les grandes lignes dégagées de notre analyse :
+
+- Le **genre du jeu est un facteur déterminant** de la durée de complétion. Les jeux de rôle et de course sont structurellement plus longs, surtout en mode "completionist", tandis que les shooters ou plateformers sont en moyenne plus courts.
+
+- La **relation entre avis positifs et temps de jeu est complexe** : si les jeux très bien notés sont un peu plus joués en moyenne, ce n’est pas un lien systématique. Le temps médian est assez peu affecté par la note, ce qui suggère que les joueurs ne s’appuient pas uniquement sur les évaluations pour décider de leur engagement.
+
+- L’étude du **genre et de la popularité** croisée aux temps de jeu montre que certains genres comme le "Massively Multiplayer" ou le "Free to Play" génèrent de très longues durées moyennes.
+
+- Le **prix** n’est pas directement lié à la durée de jeu, mais il influence la popularité. Les jeux peu chers et bien notés sont les plus achetés. Un jeu plus cher tend à être mieux noté, mais pas nécessairement plus joué.
+
+- Concernant **les plateformes, les différences de temps de complétion** ne semblent pas dues à des comportements différents, mais plutôt à la **taille du catalogue**. 
+
+- Enfin, bien que certains jeux très possédés soient très joués (ex. PUBG), beaucoup de **titres achetés en promotion ne sont presque jamais lancés**. Cela illustre un phénomène de consommation impulsive renforcé par les soldes Steam.
+
+En conclusion, le temps passé sur un jeu est influencé par des **facteurs** à la fois **structurels** (genre, modèle économique, plateforme) et **comportementaux** (lecture d’avis, objectifs personnels, préférences, achats impulsifs). Bien sur, il est important de **nuancer** un peu cette analyse puisque nos datasets ne sont pas les plus récent (respectivement 2023, Fev 2023 et 2019). Les tendances actuelles peuvent donc différer des observations issues de ces données. Enfin, on peut estimer qu'il y a un **biais de sélection** dans nos données car les jeux présents dans les datasets ne représentent pas nécessairement l’ensemble des jeux joués : par exemple le dataset **OpenCritic** reflète surtout les titres couverts par la presse spécialisée, donc plutôt des jeux "visibles", souvent moyens ou gros budgets.
+Ces éléments invitent à interpréter les résultats avec prudence, et soulignent la nécessité de croiser nos sources et d’actualiser régulièrement les données pour refléter au mieux les pratiques des joueurs et l’évolution de l’industrie du jeu vidéo.
+
+---
+
+# Temps de jeu
+
+Nous nous sommes ensiite penchés sur le temps moyen passé surles joueurs sur chaque jeu.
+
+## Il y a t il une corrélation entre le temps de jeu et son genre ?
+
+### Hypothèse
+
+Pour cette analyse, nous avons voulu identifier quels étaient les jeux présentant les **temps de jeu moyens les plus élevés** sur Steam et **les genres associés**.  
+**Notre hypothèse** est que certains types de jeux, comme les **jeux de simulation** ou les **multijoueurs**, pourraient inciter à des sessions de jeu beaucoup plus longues que d’autres genres plus rapides ou épisodiques.
+
+### Premier graphique
+
+```{r temps_jeu_genre, message=FALSE, warning=FALSE}
+
+# Nettoyer les genres : extraire le premier genre
+steam_premier_genre <- steam %>%
+  filter(!is.na(genres), average_playtime > 0) %>%
+  mutate(
+    genre_main = str_split(genres, ";", simplify = TRUE)[,1],
+    average_playtime_hours = average_playtime / 60
+  )
+
+# Calculer la moyenne du temps de jeu par genre
+genre_summary <- steam_premier_genre %>%
+  group_by(genre_main) %>%
+  summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
+  arrange(desc(mean_playtime))
+
+# Afficher le graphique
+ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime)) +
+  geom_col(show.legend = FALSE, fill = "darkblue") +
+  coord_flip() +
+  labs(
+    title = "Temps moyen de jeu par genre",
+    x = "Genre",
+    y = "Temps moyen (heures)"
+  ) +
+  theme_minimal()
+```
+
+### Interprétation
+
+Le graphique **valide notre hypothèse**, montrant clairement que les jeux de type **"Massively Multiplayer"** (MMORPG) et **"Free to Play"** enregistrent les temps de jeu moyens les plus élevés. Cela peut s’expliquer par leur fonctionnement : les MMORPG sont conçus pour retenir les joueurs sur le long terme grâce à des systèmes d’évolution progressive, de missions quotidiennes, d’interactions sociales et d'abonnement. Les jeux Free to Play, souvent multijoueurs eux aussi, encouragent également une forte rétention pour maximiser leur modèle économique basé sur les microtransactions.
+
+À l'inverse, des genres comme **"Casual"**, **"Photo Editing"**, **"Nudity"** ou encore **"Gore"** affichent des temps moyens bien plus courts. Ces catégories correspondent souvent à des expériences plus brèves, peut être de par leur contenu limité, ou parce que leur public recherche des sessions de jeu rapides.
+
+Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
+
+### Deuxième graphique
+
+```{r plus_joues_genre, message=FALSE, warning=FALSE}
+
+# Nettoyage : extraire le premier genre
+steam_clean_simple <- steam %>%
+  filter(!is.na(average_playtime), average_playtime > 0, genres != "") %>%
+  mutate(
+    average_playtime_hours = average_playtime / 60,
+    genre_main = str_split(genres, ";") |> sapply(\(x) str_trim(x[1]))
+  )
+
+# Sélection des 15 jeux les plus joués
+top_jeux_simple <- steam_clean_simple %>%
+  arrange(desc(average_playtime_hours)) %>%
+  slice_head(n = 15)
+
+# Nouveau graphique
+ggplot(top_jeux_simple, aes(x = reorder(name, average_playtime_hours), y = average_playtime_hours, fill = genre_main)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Les 15 jeux les plus joués sur Steam par genre principal",
+    x = "Jeu",
+    y = "Temps moyen de jeu (en heures)",
+    fill = "Genre principal"
+  ) +
+  scale_fill_manual(values = c("#cca505", "#d16505", "#ff4500", "#e79abd", "darkblue", "lightblue", "#00ddb0")) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.text = element_text(size = 8))
+```
+
+### Interprétation
+
+Le graphique obtenu montre que :
+
+- Certains jeux avec un genre **Adventure** ou **Free to Play** apparaissent comme ayant des **temps de jeu moyens particulièrement élevés**.
+- Parmis les 5 premiers, **3** font partie du genre **Adventure**.
+- Les **jeux de genre indépendants (Indie)** orientés du même type figurent parmi les titres les plus joués en termes de durée.
+- Cela **confirme partiellement notre hypothèse** : les genres favorisant **l'exploration** ou **l'investissement dans un personnage** tendent à engendrer des sessions de jeu beaucoup plus longues. **Cependant** nous sommes plutôt surpris de ne pas voir plus de jeux **Multijoueurs** en haut du classement, comme le montrait le premier graphique, qui ont notament une durée de vie quasi **illimité**. 
+
+Nous pouvons formuler l’hypothèse suivante : si le genre "Massively Multiplayer" apparaît très largement en tête dans le graphique 1 (temps moyen par genre), c’est parce que les jeux multijoueurs en ligne sont conçus pour encourager un investissement très long dans la durée (progression continue, événements récurrents, interactions sociales), mais ils restent peu nombreux en nombre de titres comparé aux jeux d'aventure ou free-to-play. Ainsi, dans le graphique 2, les jeux d'aventure et free-to-play dominent car ils sont beaucoup plus représentés dans le catalogue global et certains titres très populaires tirent leur genre vers le haut en termes de temps joué.
+
+### Remarque
+
+Une version dynamique de ce dernier graphique est disponible sur notre **application Shiny**, pour voir plus de jeux. 
+
+Il est important de préciser que ce dataset date de **2019**.
+Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
+
+---
+
+## Y'a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?
+
+### Graphique
+
+```{r possesseurs_temps_jeu, message=FALSE, warning=FALSE}
+# On ne prend pas en compte les jeux gratuits
+# On convertit l'intervalle de possesseurs en valeur numérique moyenne
+# On convertit le temps de jeu en heures
+steam_filtered <- steam %>%
+  filter(price > 0) %>%
+  mutate(
+    owners_min = as.numeric(sub("-.*", "", owners)),
+    owners_max = as.numeric(sub(".*-", "", owners)),
+    owners_mean = (owners_min + owners_max) / 2,
+    average_playtime_hours = average_playtime / 60
+  )
+
+# Sélection des 20 jeux payants les plus possédés
+top_games <- steam_filtered %>%
+  arrange(desc(owners_mean)) %>%
+  slice_head(n = 20)
+```
+```{r}
+ggplot(top_games,
+       aes(area = owners_mean, fill = average_playtime_hours, label = name)) +
+  geom_treemap() +
+  geom_treemap_text(
+    colour = "white",
+    place = "center",
+    grow = TRUE,
+    reflow = TRUE
+  ) +
+  scale_fill_gradient(low = "lightblue",
+                      high = "darkblue",
+                      name = "Temps de jeu moyen (heures)") +
+  labs(title = "Les 20 jeux Steam les plus vendus",
+       subtitle = "possession vs. temps de jeu moyen",
+       caption = "Source : steam.csv") +
+  theme_minimal()
+```
+
+### Interprétation
+
+On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
+
+### Remarque
+
+Une version de ce treemap est disponible sur notre **application Shiny**.
+
+---
+
+## Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?
+
+### Hypothèse
 
 Pour répondre à cette question, nous cherchons à réaliser un histogramme comparant les avis des joueurs au temps de jeu moyen et médian passé sur les jeux.
 
-
-## Graphique
+### Graphique
 
 ```{r avis_temps_jeu, message=FALSE, warning=FALSE, fig.width=12, fig.height=7}
 ratings_playtime <- steam %>% filter(average_playtime != 0) %>% mutate(
@@ -324,121 +663,28 @@ ggplot(ratings_summary, aes(x = rating_bucket)) +
   )
 ```
 
-## Interprétation
+### Interprétation
 
 D'après le temps de jeu moyen, plus les avis sont positifs plus les jeux sont joués. Néanmoins, d'après le temps jeu médian, les avis, qu'ils soient très positifs ou très négatifs ou dans l'entre-deux, n'influencent pas le temps passé sur les jeux. Donc, très peu de joueurs se fient aux avis Steam ou ils préfèrent jouer quelques heures avant d'aller lire les avis. Les avis Steam ne sont peut-être pas aussi pertinents que ceux rédigés par la presse et les magazines spécialisés.
 
-## Remarque
+### Remarque
 
 Une version dynamique de ce graphique est disponible sur notre **application Shiny**, pour voir les moyennes séparées en plus ou moins de tranches.
 
 ---
 
-# Il y a t il une corrélation entre le temps de jeu et son genre ?
+# Avis
 
-## Hypothèse
+Le graphe précédent ayant soulevé la question des notes données aux jeux par les joueurs, nous avons ensuite étudié plus concrètement les avis que reçoivent les jeux.
 
-Pour cette analyse, nous avons voulu identifier quels étaient les jeux présentant les **temps de jeu moyens les plus élevés** sur Steam et **les genres associés**.  
-**Notre hypothèse** est que certains types de jeux, comme les **jeux de simulation** ou les **multijoueurs**, pourraient inciter à des sessions de jeu beaucoup plus longues que d’autres genres plus rapides ou épisodiques.
+## Y'a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?
 
-## Premier graphique
-
-```{r temps_jeu_genre, message=FALSE, warning=FALSE}
-
-# Nettoyer les genres : extraire le premier genre
-steam_premier_genre <- steam %>%
-  filter(!is.na(genres), average_playtime > 0) %>%
-  mutate(
-    genre_main = str_split(genres, ";", simplify = TRUE)[,1],
-    average_playtime_hours = average_playtime / 60
-  )
-
-# Calculer la moyenne du temps de jeu par genre
-genre_summary <- steam_premier_genre %>%
-  group_by(genre_main) %>%
-  summarise(mean_playtime = mean(average_playtime_hours, na.rm = TRUE)) %>%
-  arrange(desc(mean_playtime))
-
-# Afficher le graphique
-ggplot(genre_summary, aes(x = reorder(genre_main, mean_playtime), y = mean_playtime)) +
-  geom_col(show.legend = FALSE, fill = "darkblue") +
-  coord_flip() +
-  labs(
-    title = "Temps moyen de jeu par genre",
-    x = "Genre",
-    y = "Temps moyen (heures)"
-  ) +
-  theme_minimal()
-```
-
-## Interprétation
-
-Le graphique **valide notre hypothèse**, montrant clairement que les jeux de type **"Massively Multiplayer"** (MMORPG) et **"Free to Play"** enregistrent les temps de jeu moyens les plus élevés. Cela peut s’expliquer par leur fonctionnement : les MMORPG sont conçus pour retenir les joueurs sur le long terme grâce à des systèmes d’évolution progressive, de missions quotidiennes, d’interactions sociales et d'abonnement. Les jeux Free to Play, souvent multijoueurs eux aussi, encouragent également une forte rétention pour maximiser leur modèle économique basé sur les microtransactions.
-
-À l'inverse, des genres comme **"Casual"**, **"Photo Editing"**, **"Nudity"** ou encore **"Gore"** affichent des temps moyens bien plus courts. Ces catégories correspondent souvent à des expériences plus brèves, peut être de par leur contenu limité, ou parce que leur public recherche des sessions de jeu rapides.
-
-Cependant, avec cette visualisation il est assez difficile d'en tirer une analyse complète. Nous avons donc réalisé une **seconde analyse** plus précise, centrée sur les **15 jeux les plus joués**. Cela permet d'illustrer concrètement quels jeux dominent vraiment en termes de durée, et de voir si certains genre sortent alors du lot.
-
-## Deuxième graphique
-
-```{r plus_joues_genre, message=FALSE, warning=FALSE}
-
-# Nettoyage : extraire le premier genre
-steam_clean_simple <- steam %>%
-  filter(!is.na(average_playtime), average_playtime > 0, genres != "") %>%
-  mutate(
-    average_playtime_hours = average_playtime / 60,
-    genre_main = str_split(genres, ";") |> sapply(\(x) str_trim(x[1]))
-  )
-
-# Sélection des 15 jeux les plus joués
-top_jeux_simple <- steam_clean_simple %>%
-  arrange(desc(average_playtime_hours)) %>%
-  slice_head(n = 15)
-
-# Nouveau graphique
-ggplot(top_jeux_simple, aes(x = reorder(name, average_playtime_hours), y = average_playtime_hours, fill = genre_main)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    title = "Les 15 jeux les plus joués sur Steam par genre principal",
-    x = "Jeu",
-    y = "Temps moyen de jeu (en heures)",
-    fill = "Genre principal"
-  ) +
-  scale_fill_manual(values = c("#cca505", "#d16505", "#ff4500", "#e79abd", "darkblue", "lightblue", "#00ddb0")) +
-  theme_minimal() +
-  theme(legend.position = "bottom", legend.text = element_text(size = 8))
-```
-
-## Interprétation
-
-Le graphique obtenu montre que :
-
-- Certains jeux avec un genre **Adventure** ou **Free to Play** apparaissent comme ayant des **temps de jeu moyens particulièrement élevés**.
-- Parmis les 5 premiers, **3** font partie du genre **Adventure**.
-- Les **jeux de genre indépendants (Indie)** orientés du même type figurent parmi les titres les plus joués en termes de durée.
-- Cela **confirme partiellement notre hypothèse** : les genres favorisant **l'exploration** ou **l'investissement dans un personnage** tendent à engendrer des sessions de jeu beaucoup plus longues. **Cependant** nous sommes plutôt surpris de ne pas voir plus de jeux **Multijoueurs** en haut du classement, comme le montrait le premier graphique, qui ont notament une durée de vie quasi **illimité**. 
-
-Nous pouvons formuler l’hypothèse suivante : si le genre "Massively Multiplayer" apparaît très largement en tête dans le graphique 1 (temps moyen par genre), c’est parce que les jeux multijoueurs en ligne sont conçus pour encourager un investissement très long dans la durée (progression continue, événements récurrents, interactions sociales), mais ils restent peu nombreux en nombre de titres comparé aux jeux d'aventure ou free-to-play. Ainsi, dans le graphique 2, les jeux d'aventure et free-to-play dominent car ils sont beaucoup plus représentés dans le catalogue global et certains titres très populaires tirent leur genre vers le haut en termes de temps joué.
-
-## Remarque
-
-Une version dynamique de ce dernier graphique est disponible sur notre **application Shiny**, pour voir plus de jeux. 
-
-Il est important de préciser que ce dataset date de **2019**.
-Depuis, les jeux les plus joués sur Steam ont largement évolué, d'après Steam [Classement actuel des jeux les plus joués sur Steam (SteamDB)](https://steamdb.info/charts/) : des titres comme Counter-Strike 2, Dota 2 ou encore PUBG dominent aujourd'hui les classements. Les tendances actuelles sont donc significativement différentes de celles observées dans cette visualisation.
-
----
-
-# Il y a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?
-
-## Hypothèse
+### Hypothèse
 
 Nous avons voulu déterminer si le **prix** d’un jeu et **l’avis donné par les joueurs** avaient une influence sur le **nombre de personnes qui achètent le jeu**, mais aussi si il y avait une corrélation entre le **prix** et **l’avis des joueurs**.
 Nous pensons que les jeux les **moins chers** et les **mieux notés** sont ceux qui sont les plus achetés. 
 
-## Premier graphique 
+### Premier graphique 
 ```{r prix_note_possesseurs, message=FALSE, warning=FALSE}
 
 # On ne garde que les variables dont on a besoin (avis, note, nombre de possesseurs)
@@ -491,7 +737,7 @@ graphe
 
 ```
 
-## Interprétation
+### Interprétation
 
 Le graphique obtenu montre que :
 
@@ -517,13 +763,13 @@ Par ailleurs, on peut supposer que les utilisateurs qui achètent un jeu **plus 
 
 Nous avons ensuite réalisé une heatmap des corrélations multivariées, qui permet de quantifier la corrélation entre les différentes features du dataset, comme le prix, les avis ou la popularité. Nous allons nous servir d'une matrice de correlation pour notre analyse.
 
-## Remarque
+### Remarque
 
 Une version dynamique de ce graphique est disponible sur notre **application Shiny**, pour pouvoir modifier l'intervalle de prix visualisé. 
 
 Nous avons supprimé les lignes où il y avait trop de possesseurs ou un prix trop élévé pour éviter que quelques outliers ne rendent le graphique illisible car trop petit. Nous avons aussi supprimé les lignes où il y avait trop peu d'avis car elles auraient pu fausser les données.
 
-## Deuxième graphique
+### Deuxième graphique
 
 ```{r prix_note_possesseurs_heatmap, message=FALSE, warning=FALSE}
 
@@ -566,7 +812,7 @@ ggplot(corr_long, aes(Var1, Var2, fill = Corr)) +
 
 ```
 
-## Interprétation
+### Interprétation
 
 La corrélation très forte ( r ≈ 0,76 ) entre popularité (nombre de possesseurs) et positive_ratings confirme qu’un jeu largement diffusé reçoit mécaniquement davantage d’avis positifs ; on retrouve ici l’effet « plus on est joué, plus on est noté ».
 
@@ -578,256 +824,16 @@ Enfin, la quasi-absence de rapport entre prix et temps de jeu ( r ≈ -0,03 ) in
 
 ---
 
-# Y a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?
+## Les avis des joueurs sur les jeux sont-ils différents de ceux de la presse spécialisée ?
 
-## Graphique
-
-```{r possesseurs_temps_jeu, message=FALSE, warning=FALSE}
-# On ne prend pas en compte les jeux gratuits
-# On convertit l'intervalle de possesseurs en valeur numérique moyenne
-# On convertit le temps de jeu en heures
-steam_filtered <- steam %>%
-  filter(price > 0) %>%
-  mutate(
-    owners_min = as.numeric(sub("-.*", "", owners)),
-    owners_max = as.numeric(sub(".*-", "", owners)),
-    owners_mean = (owners_min + owners_max) / 2,
-    average_playtime_hours = average_playtime / 60
-  )
-
-# Sélection des 20 jeux payants les plus possédés
-top_games <- steam_filtered %>%
-  arrange(desc(owners_mean)) %>%
-  slice_head(n = 20)
-```
-```{r}
-ggplot(top_games,
-       aes(area = owners_mean, fill = average_playtime_hours, label = name)) +
-  geom_treemap() +
-  geom_treemap_text(
-    colour = "white",
-    place = "center",
-    grow = TRUE,
-    reflow = TRUE
-  ) +
-  scale_fill_gradient(low = "lightblue",
-                      high = "darkblue",
-                      name = "Temps de jeu moyen (heures)") +
-  labs(title = "Les 20 jeux Steam les plus vendus",
-       subtitle = "possession vs. temps de jeu moyen",
-       caption = "Source : steam.csv") +
-  theme_minimal()
-```
-
-## Interprétation
-
-On remarque que PUBG (PlayerUnknown's Battlegrounds) est le jeu payant Steam le plus possédé qui est le plus joué. Mais il reste presque le seul jeu payant Steam très vendu à être très joué. En effet, d'après le graphique, plusieurs jeux sont énormément possédés, comme Portal, Portal 2 et Half Life, et très peu joués voire pas du tout lancés. Cela peut s'expliquer par l'offre groupée des jeux Valve qui est vendue très peu cher en période de soldes. Il y a également des jeux comme Payday 2 et Skyrim qui font partie de la bibliothèque de beaucoup de joueurs mais qui ne sont pas tant joués que ça. Cela peut aussi s'expliquer par le phénomène des soldes. Durant les soldes, Steam propose des jeux populaires et présents sur la plateforme depuis très longtemps à des prix très bas. Donc, une certaine partie des joueurs achètent des jeux de manière compulsive afin d'ajouter les jeux à leur bibliothèque se persuadant qu'ils vont y jouer un jour. En réalité, ce graphique montre qu'une grande partie des joueurs n'essayera même pas d'y jouer une seule fois.
-
-## Remarque
-
-Une version de ce treemap est disponible sur notre **application Shiny**.
-
----
-
-# Les temps de complétion varient-ils selon la plateforme ?
-
-## Hypothèse
-
-Certains jeux pourraient être plus longs sur **Windows** que sur **Mac** ou **Linux**, en raison d’une **optimisation différente**, d’un **public distinct** ou d’un **catalogue partiel**. Nous faisons l’hypothèse que les jeux disponibles sur Windows sont en moyenne plus longs à jouer, car c’est la plateforme la plus courante, avec le catalogue le plus complet.
-
-## Graphique 1
-
-```{r plateform_des_jeux, message=FALSE, warning=FALSE}
-library(dplyr)
-library(ggplot2)
-library(stringr)
-library(tidyr)
-
-# Nettoyage de base
-steam <- steam %>%
-  filter(average_playtime > 0) %>% # on garde les jeux joués
-  mutate(
-    average_playtime_hours = average_playtime / 60,
-    windows = str_detect(platforms, "windows"),
-    mac     = str_detect(platforms, "mac"),
-    linux   = str_detect(platforms, "linux")
-  )
-
-# Création du dataset long : une ligne par plateforme présente
-steam_long <- steam %>%
-  select(name, average_playtime_hours, windows, mac, linux) %>%
-  pivot_longer(cols = c(windows, mac, linux),
-               names_to = "platform",
-               values_to = "available") %>%
-  filter(available == TRUE)
-
-# Résumé par plateforme
-platform_summary <- steam_long %>%
-  group_by(platform) %>%
-  summarise(
-    n_jeux = n(),
-    moyenne_heures = mean(average_playtime_hours),
-    mediane_heures = median(average_playtime_hours)
-  )
-
-# Affichage du graphique
-ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
-  geom_boxplot(outlier.alpha = 0.2) +
-  scale_y_continuous(trans = "sqrt") +
-  labs(
-    title = "Temps de jeu moyen par plateforme (jeux Steam)",
-    x = "Plateforme",
-    y = "Temps moyen (heures)",
-    fill = "Plateforme"
-  ) +
-  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
-  theme_minimal()
-```
-
-## Remarque
-
-Le graphique est assez pertinent pour voir les **extremums**, mais complique la lecture pour les boîtes en elles-mêmes. En effet, le **temps de jeu moyen** pour la majorité des jeux est relativement faible (souvent au alentour de **20h**). Mais certains jeux (typiquement les **MMO ou jeux multijoueurs**) atteignent des temps de jeu particulièrement élevé (plusieurs **milliers d’heures**). De ce fait, l’échelle de l’**axe Y s’étire** énormément, rendant les boxplots écrasés vers le bas.
-
-Étant donné que ces extremum sont très semblables, j'ai décidé de refaire un graphique en adaptant l'axe Y (limité à 100h) pour plus de visibilité :
-
-## Graphique 1.2
-
-```{r plateform_des_jeux2, message=FALSE, warning=FALSE}
-ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
-  geom_boxplot(outlier.alpha = 0.2) +
-  coord_cartesian(ylim = c(0, 100)) +
-  labs(
-    title = "Temps de jeu par plateforme (jeux Steam)",
-    subtitle = "Distribution des temps de jeu moyens (limités à 100h)",
-    x = "Plateforme",
-    y = "Temps moyen (heures)",
-    fill = "Plateforme"
-  ) +
-  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
-  theme_minimal()
-```
-
-## Interprétation des résultats 
-
-Cette nouvelle version du graphique permet d'y voir un peu plus clair sur les différences de temps de jeu moyen selon les plateformes supportées par les jeux Steam :
-
-- **Windows** semble être la plate-forme la plus courante, elle affiche la plus grande variabilité de temps de jeu ;
-- **Mac** montre des temps de jeu en moyenne plus élevés que Linux ;
-
-Ces variations peuvent s'expliquer de différentes manières. Cependant, la lisibilité de ce graphique me semblant encore assez complexe, j'ai décidé de l'adapter pour essayer d'y voir un peu plus clair d'abord, notamment en prenant une **échelle logarithmique**, et un autre type de graphique : le **Violon plot**.
-
-
-## Graphique 2
-
-```{r plateform_des_jeux3, message=FALSE, warning=FALSE}
-ggplot(steam_long, aes(x = platform, y = average_playtime_hours, fill = platform)) +
-  geom_violin(trim = FALSE, alpha = 0.6) +
-  scale_y_log10() +
-  labs(title = "Distribution des temps de jeu moyens par plateforme (violin plot)",
-       y = "Temps de jeu (heures, log)", x = "Plateforme") +
-  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
-  theme_minimal()
-```
-
-## Interprétation 
-
-Sur cette forme de graphique, nous avons plusieurs choses :
-- En premier, **l'échelle** : c'est une échelle logarithmique, cela signifie qu’au lieu d’avoir un axe linéaire (1, 2, 3, ...), on a ici une échelle de puissance de 10 :
-    - 1e-01 → 0,1 heure (≈ 6 minutes)
-    - 1e+00 → 1 heure
-    - 1e+01 → 10 heures
-    - 1e+02 → 100 heures
-    - 1e+03 → 1000 heures (= plus de 40 jours) 
-
-L'**avantage** de cette échelle est qu'elle **compresse visuellement les valeurs extrêmes** et **rend plus lisibles les tendances générales**, même en présence de très gros outliers.
-
-- En deuxième, la **largeur** du violon : elle indique à chaque hauteur la **densité de jeux** à ce niveau de durée. Ainsi : 
-    - Si le violon est large vers 1e+01, cela signifie que de nombreux jeux ont une durée moyenne autour de 10h.
-    - Si le violon est étroit à un endroit, il y a peu de jeux avec ce temps de jeu moyen.
-    
-Maintenant, revenons à nos **résultats** :
-- Sur les **3 plateformes**, la majorité des jeux ont un **temps moyen compris entre 1h et 10h** (zone la plus large, centrée vers 1e+00 à 1e+01).
-- **Quelques jeux dépassent** les 100h voire 1000h, mais ils sont très rares : c’est la partie très fine et étirée du haut du violon.
-- Les **distributions sont globalement similaires** entre les 3 plateformes :
-    - **Windows** a une base légèrement plus étalée vers le bas, ce qui suggère qu’il y a un peu plus de jeux avec très peu de temps de jeu moyen.
-    - **Linux** et **Mac** semblent un peu plus concentrés autour d’un cœur de distribution (≈ 5-10h).
-
-En conclusion sur ce graphique :
-- Il ne montre **pas un écart majeur** entre les plateformes ;
-- J'ai supposé que Windows puisse avoir **plus de jeux disponibles** sur sa plateforme, c'est pourquoi j'ai produit ce bar chart :
-
-
-## Graphique 3
-
-```{r plateform_des_jeux4, message=FALSE, warning=FALSE}
-steam %>%
-  summarise(
-    Windows = sum(windows, na.rm = TRUE),
-    Mac = sum(mac, na.rm = TRUE),
-    Linux = sum(linux, na.rm = TRUE)
-  ) %>%
-  pivot_longer(everything(), names_to = "platform", values_to = "n") %>%
-  ggplot(aes(x = platform, y = n, fill = platform)) +
-  geom_col() +
-  labs(title = "Nombre de jeux disponibles par plateforme",
-       x = "Plateforme",
-       y = "Nombre de jeux") +
-  scale_fill_manual(values = c("#ff4500", "#e79abd", "darkblue")) +
-  theme_minimal()
-```
-
-## Interprétation  
-
-Ce graphique montre le nombre total de jeux disponibles sur Steam pour chaque plateforme. On observe que :
-- **Windows** domine très largement avec plus de **6000** jeux disponibles.
-- **Mac** suit avec environ **2500** jeux.
-- **Linux** ferme la marche avec environ **1700** jeux.
-
-Cette différence quantitative permet d’expliquer **pourquoi** la distribution des temps de jeu sur Windows était plus étalée dans le violin plot :
-==> Plus il y a de jeux disponibles, plus la distribution s’élargit mécaniquement
-
-Pour conclure sur ce graphique, l’analyse des temps de complétion par plateforme, à travers ces visualisations complémentaires, nous permet de dire :
-- Les **distributions de temps de jeu sont globalement similaires** entre Windows, Mac et Linux ;
-- Toutefois, **Windows** présente une distribution **plus étalée**, avec davantage de temps de jeux, ce qui s’explique par son **catalogue beaucoup plus vaste** ;
-
-En conclusion, les différences de temps de jeu moyen entre plateformes ne semblent pas liées à des caractéristiques intrinsèques des systèmes, mais plutôt à la taille et la diversité du catalogue disponible sur chaque plateforme.
-
-
-## Conclusion générale
-
-Notre exploration multidimensionnelle du temps de jeu des jeux vidéo nous a permis de valider plusieurs hypothèses, mais aussi d’en nuancer d’autres. En combinant des sources complémentaires (HowLongToBeat, OpenCritic, Steam), nous avons pu croiser données techniques, critiques/notations et comportements réels des joueurs.
-
-Voici les grandes lignes dégagées de notre analyse :
-
-- Le **genre du jeu est un facteur déterminant** de la durée de complétion. Les jeux de rôle et de course sont structurellement plus longs, surtout en mode "completionist", tandis que les shooters ou plateformers sont en moyenne plus courts.
-
-- La **relation entre avis positifs et temps de jeu est complexe** : si les jeux très bien notés sont un peu plus joués en moyenne, ce n’est pas un lien systématique. Le temps médian est assez peu affecté par la note, ce qui suggère que les joueurs ne s’appuient pas uniquement sur les évaluations pour décider de leur engagement.
-
-- L’étude du **genre et de la popularité** croisée aux temps de jeu montre que certains genres comme le "Massively Multiplayer" ou le "Free to Play" génèrent de très longues durées moyennes.
-
-- Le **prix** n’est pas directement lié à la durée de jeu, mais il influence la popularité. Les jeux peu chers et bien notés sont les plus achetés. Un jeu plus cher tend à être mieux noté, mais pas nécessairement plus joué.
-
-- Concernant **les plateformes, les différences de temps de complétion** ne semblent pas dues à des comportements différents, mais plutôt à la **taille du catalogue**. 
-
-- Enfin, bien que certains jeux très possédés soient très joués (ex. PUBG), beaucoup de **titres achetés en promotion ne sont presque jamais lancés**. Cela illustre un phénomène de consommation impulsive renforcé par les soldes Steam.
-
-En conclusion, le temps passé sur un jeu est influencé par des **facteurs** à la fois **structurels** (genre, modèle économique, plateforme) et **comportementaux** (lecture d’avis, objectifs personnels, préférences, achats impulsifs). Bien sur, il est important de **nuancer** un peu cette analyse puisque nos datasets ne sont pas les plus récent (respectivement 2023, Fev 2023 et 2019). Les tendances actuelles peuvent donc différer des observations issues de ces données. Enfin, on peut estimer qu'il y a un **biais de sélection** dans nos données car les jeux présents dans les datasets ne représentent pas nécessairement l’ensemble des jeux joués : par exemple le dataset **OpenCritic** reflète surtout les titres couverts par la presse spécialisée, donc plutôt des jeux "visibles", souvent moyens ou gros budgets.
-Ces éléments invitent à interpréter les résultats avec prudence, et soulignent la nécessité de croiser nos sources et d’actualiser régulièrement les données pour refléter au mieux les pratiques des joueurs et l’évolution de l’industrie du jeu vidéo.
-
-
----
-
-
-# Les avis des joueurs sur les jeux sont-ils différents de ceux de la presse spécialisée ?
-
-## Hypothèse
+### Hypothèse
 
 Nous avons voulu déterminer si l'**avis des joueurs** sur un jeu et celui de la **presse spécialisée** étaient différents.
 Pour cela, nous verrons une comparaison des avis sur les **10 jeux les mieux notés par les joueurs** et les **10 jeux les mieux notés par la presse**.
 Nous allons aussi voir les jeux pour lesquels **la presse et les joueurs ont donné le même avis**, en comparant les jeux avec les **meilleures et les pires notes**. 
 Nous pensons que les deux avis seront très différents mais nous ne savons pas exactement comment. Nous pensons que des jeux très connus vont avoir de **bonnes notes** de la part des deux, et que des jeux peu connus risquent d'avoir **deux notes avec plus de différence**.
 
-## Graphiques 
+### Graphiques 
 
 ```{r note_presse_joueurs, message=FALSE, warning=FALSE}
 # Fusionner les données selon le nom du jeu
@@ -944,17 +950,7 @@ graphe_plus_proches
 
 ```
 
-## Interprétation
-
-Les graphiques obtenus montrent que :
-
-- Les **deux jeux présents dans le top 10 de la presse et des joueurs** sont "The Legend of Zelda : Breath of the Wild" et "Persona 5 Royal".
-- Pour les jeux préférés des joueurs, l'avis de la presse est souvent très proche de l'avis des joueurs (moins de 5 points d'écart) pour les jeux populaires, mais inférieur de 15 à 30 points pour les jeux moins connus.
-- Les jeux préférés de la presse sont uniquement des **jeux très populaires**. Ils ont aussi des avis très élevés (90 ou plus) de la part des joueurs.
-- God of War
-- Les jeux avec le plus d'écart entre l'avis des joueurs et celui de la presse ont tous un avis très bas des joueurs, soit 10 soit 20, alors que l'avis de la presse est au-dessus de 60.
-
-Dans le cas du 5ème diagramme, sur les notes les plus différentes, il est important de noter que 
+### Interprétation
 
 Dans le **premier graphique**, sur les jeux préférés de la presse,  nous pouvons remarquer plusieurs choses. Tout d'abord, les scores donnés par la presse et les joueurs sont **très proches**, de 1 à 7 points d'écarts. Le score de la presse est presque toujours plus élevé que celui des joueurs, ce qui est logique étant donné que nous avons pris les jeux avec les plus hauts scores de la presse. Tous les jeux de cette liste sont connus et aimés du grand public, donc ce n'est pas surprenant qu'ils aient tous des scores au-dessus de 90.
 Par ailleurs, le jeu *God of War* est un **outlier**, il a deux scores de la part des joueurs. En consultant le site How Long To Beat, nous pouvons déduire que cela est dû au fait que le site comporte deux jeux appelés *God of War*, *God of War (2005)* et *God of War (2018)*.
@@ -983,7 +979,7 @@ Nous avions envisagé d'aussi représenter les **scores les plus éloignés**, m
 
 Pour conclure, les **jeux de licenses célèbres** ont souvent de **très bonnes critiques**, tandis que les **jeux peu connus** reçoivent des avis variables. Les **problèmes** qui donnent lieu à des notes basses, notamment de la part de la presse, sont souvent le **manque de maniabilité** et des **problèmes de gameplay**, le **manque d'originalité**, une **diffculté trop importante** et une **histoire pas assez intéressante**.
 
-## Remarque
+### Remarque
 
 Nous avons **supprimé les lignes** où les avis des joueurs étaient **égaux à 0 ou à 100**, car cela pourrait signifier qu'il y a eu peu d'avis donnés. N'ayant pas de données sur le nombre d'avis, nous n'avons pas trouvé de meilleur moyen de filtrer les lignes. 
 
@@ -991,9 +987,7 @@ Il est important de préciser que certains jeux peuvent avoir été **omis** dan
 
 Il faut aussi noter que l'**échelle horizontale** est **différente selon le graphique**.
 
-
 ---
-
 
 # Annexe
 
@@ -1010,9 +1004,10 @@ Il faut aussi noter que l'**échelle horizontale** est **différente selon le gr
 
 Chaque personne a réalisé les graphes et rédigé l’analyse pour les questions dont elle s’est occupée :
 
-"Le genre d’un jeu influence-t-il sa durée de complétion ?" - Virgile
-"Il y a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?" - Lucile - Virgile
-"Il y a t il une corrélation entre le temps de jeu et son genre ?" - Tifenn
-"Les temps de complétion varient-ils selon la plateforme ?" - Tifenn 
-"Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?" - Ilan
-"Y a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?" - Ilan
+- "Le genre d’un jeu influence-t-il sa durée de complétion ?" : Virgile
+- "Les temps de complétion varient-ils selon la plateforme ?" : Tifenn 
+- "Il y a t il une corrélation entre le temps de jeu et son genre ?" : Tifenn
+- "Y'a-t-il un lien entre le nombre de possesseurs des jeux et le temps passé sur les jeux ?" : Ilan
+- "Dans quelle mesure la proportion d'avis positifs par rapport aux avis négatifs des jeux vidéos influence-t-elle le temps passé sur ces jeux ?" : Ilan
+- "Y'a t il une relation entre le prix d'un jeu, sa note et le nombre de personnes qui le possèdent ?" :  Lucile (scatter plot) & Virgile (heatmap)
+- "Les avis des joueurs sur les jeux sont-ils différents de ceux de la presse spécialisée ?" : Lucile
